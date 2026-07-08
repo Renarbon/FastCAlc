@@ -30,8 +30,26 @@
 }
 
 /* Opcional: darle más espacio al card de USD */
+.metric {
+  min-width: 0;
+}
+
+.metric .value,
+#filteredUsdMetric {
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+/* Más espacio al card de USD */
 .metric.usd-wide {
-  min-width: 210px;
+  min-width: 240px;
+}
+
+.metric.usd-wide strong {
+  white-space: nowrap;
+  overflow: visible;
+  text-overflow: clip;
 }
     * {
       box-sizing: border-box;
@@ -287,7 +305,7 @@
       <div class="metric"><span>Pagos/descuentos L</span><strong id="creditMetric">L 0.00</strong></div>
       <div class="metric"><span>Categoria principal</span><strong id="topCategoryMetric">-</strong></div>
       <div class="metric"><span>Saldo filtrado L</span><strong id="filteredMetric">L 0.00</strong></div>
-      <div class="metric"><span>USD aislado</span><strong id="filteredUsdMetric">$ 0.00</strong></div>
+      <div class="metric usd-wide"><span>USD aislado</span><strong id="filteredUsdMetric">$ 0.00</strong></div>
       <div class="metric"><span>Archivo</span><strong id="fileMetric" title="-">-</strong></div>
     </section>
 
