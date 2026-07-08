@@ -18,15 +18,34 @@
       --good: #16784b;
       --warn: #9a5a00;
     }
+/* ===== Fix visual: USD aislado ===== */
+.metrics {
+  align-items: stretch;
+}
+
 .metric {
   min-width: 0;
 }
 
-.metric .value,
-#filteredUsdMetric {
+.metric .label {
   white-space: nowrap;
-  overflow: hidden;
-  text-overflow: ellipsis;
+}
+
+.metric .value {
+  white-space: normal;
+  overflow: visible;
+  text-overflow: initial;
+  line-height: 1.2;
+  word-break: break-word;
+}
+
+.metric.usd-wide {
+  min-width: 300px;
+}
+
+#filteredUsdMetric small {
+  font-size: 12px;
+  opacity: 0.8;
 }
 
 /* Opcional: darle más espacio al card de USD */
