@@ -319,25 +319,13 @@
     </section>
   </main>
 
- <script type="module">
+<script type="module">
   import * as pdfjs from "https://cdnjs.cloudflare.com/ajax/libs/pdf.js/4.10.38/pdf.min.mjs";
-
   pdfjs.GlobalWorkerOptions.workerSrc = "https://cdnjs.cloudflare.com/ajax/libs/pdf.js/4.10.38/pdf.worker.min.mjs";
 
   const categories = [
-    "Saldo anterior",
-    "Supermercado",
-    "Comer fuera",
-    "Cuotas / financiamiento",
-    "Appliances",
-    "Gasolina",
-    "Servicios",
-    "Salud",
-    "Transporte",
-    "Compras",
-    "Entretenimiento",
-    "Banco / cargos",
-    "Otros"
+    "Saldo anterior","Supermercado","Comer fuera","Cuotas / financiamiento","Appliances",
+    "Gasolina","Servicios","Salud","Transporte","Compras","Entretenimiento","Banco / cargos","Otros"
   ];
 
   const categoryRules = [
@@ -358,26 +346,10 @@
   ];
 
   const profiles = {
-    ficohsa: {
-      label: "Ficohsa",
-      amountMode: "first",
-      skip: /saldo anterior|saldo actual|limite|l[ií]mite|fecha descripci[oó]n|total/i
-    },
-    bac: {
-      label: "BAC",
-      amountMode: "last",
-      skip: /saldo anterior|saldo actual|pago minimo|pago m[ií]nimo|fecha de corte|limite|l[ií]mite|total/i
-    },
-    banpais: {
-      label: "Banpais",
-      amountMode: "first",
-      skip: /saldo anterior|saldo actual|fecha transacci[oó]n|fecha posteo|limite|l[ií]mite|total/i
-    },
-    promerica: {
-      label: "Promerica",
-      amountMode: "last",
-      skip: /saldo anterior|saldo actual|fecha transacci[oó]n|fecha posteo|pago contado|limite|l[ií]mite|total/i
-    }
+    ficohsa: { label: "Ficohsa", amountMode: "first", skip: /saldo anterior|saldo actual|limite|l[ií]mite|fecha descripci[oó]n|total/i },
+    bac:     { label: "BAC",     amountMode: "last",  skip: /saldo anterior|saldo actual|pago minimo|pago m[ií]nimo|fecha de corte|limite|l[ií]mite|total/i },
+    banpais: { label: "Banpais", amountMode: "first", skip: /saldo anterior|saldo actual|fecha transacci[oó]n|fecha posteo|limite|l[ií]mite|total/i },
+    promerica:{label:"Promerica",amountMode:"last",   skip: /saldo anterior|saldo actual|fecha transacci[oó]n|fecha posteo|pago contado|limite|l[ií]mite|total/i}
   };
 
   const state = {
@@ -436,6 +408,7 @@
 
     const data = new Uint8Array(await file.arrayBuffer());
     const pdf = await pdfjs.getDocument({ data }).promise;
+
     const pages = [];
     const structuredRows = [];
 
@@ -443,16 +416,9 @@
       const page = await pdf.getPage(pageNumber);
       const content = await page.getTextContent();
 
-      const pageRows = textItemsToRows(content.items).map((raw) => {
-        try {
-          return JSON.parse(raw);
-        } catch {
-          return { line: raw, amountTokens: [] };
-        }
-      });
-
-      structuredRows.push(...pageRows);
-      pages.push(pageRows.map((r) => r.line).join("\n"));
+      const pageLines = textItemsToRows(content.items);
+      pages.push(pageLines.join("\n"));
+      structuredRows.push(...pageLines.map((line) => ({ line, amountTokens: [] })));
     }
 
     state.rawRows = structuredRows;
@@ -472,40 +438,33 @@
   function textItemsToRows(items) {
     const rows = [];
 
-    const normalizedItems = items
+    items
       .filter((item) => item.str && item.str.trim())
       .map((item) => ({
         text: item.str.trim(),
         x: item.transform[4],
         y: Math.round(item.transform[5] / 3) * 3
       }))
-      .sort((a, b) => b.y - a.y || a.x - b.x);
-
-    normalizedItems.forEach((item) => {
-      let row = rows.find((candidate) => Math.abs(candidate.y - item.y) <= 3);
-      if (!row) {
-        row = { y: item.y, parts: [] };
-        rows.push(row);
-      }
-      row.parts.push(item);
-    });
+      .sort((a, b) => b.y - a.y || a.x - b.x)
+      .forEach((item) => {
+        let row = rows.find((candidate) => Math.abs(candidate.y - item.y) <= 3);
+        if (!row) {
+          row = { y: item.y, parts: [] };
+          rows.push(row);
+        }
+        row.parts.push(item);
+      });
 
     return rows
       .sort((a, b) => b.y - a.y)
-      .map((row) => {
-        const sorted = row.parts.sort((a, b) => a.x - b.x);
-        const line = sorted.map((part) => part.text).join(" ").replace(/\s+/g, " ").trim();
-
-        const amountTokens = sorted
-          .map((part) => ({
-            text: part.text,
-            x: part.x,
-            isAmount: /^(?:L\.?|HNL|USD|US\$|\$)?\s*-?(?:\d{1,3}(?:,\d{3})+|\d+)(?:\.\d{2})-?$/.test(part.text)
-          }))
-          .filter((p) => p.isAmount);
-
-        return JSON.stringify({ line, amountTokens });
-      })
+      .map((row) =>
+        row.parts
+          .sort((a, b) => a.x - b.x)
+          .map((part) => part.text)
+          .join(" ")
+          .replace(/\s+/g, " ")
+          .trim()
+      )
       .filter(Boolean);
   }
 
@@ -537,13 +496,11 @@
       .flatMap((line) => parseLine(line, profileKey, rawRows) || [])
       .filter(Boolean);
 
-    const extraRows = profileKey === "bac" ? parseBacInstallmentRows(text, directRows) : [];
-    return mergeDuplicateTransactions([...directRows, ...extraRows]);
+    return mergeDuplicateTransactions(directRows);
   }
 
   function parseLine(line, profileKey = "ficohsa", rawRows = []) {
     if (profileKey === "ficohsa") return parseFicohsaLine(line, rawRows);
-    if (profileKey === "bac") return parseBacLine(line);
 
     const profile = profiles[profileKey] || profiles.ficohsa;
     if (profile.skip?.test(line)) return null;
@@ -569,8 +526,7 @@
 
     if (!description || description.length < 3) return null;
 
-    const typeSource = `${description} ${amountText}`;
-    const looksLikeCredit = isCreditTransaction(typeSource);
+    const looksLikeCredit = isCreditTransaction(`${description} ${amountText}`);
     const currency = detectCurrency(`${line} ${amountText}`);
     const signedAmount = looksLikeCredit ? -Math.abs(amount) : Math.abs(amount);
 
@@ -583,9 +539,9 @@
       signedAmount,
       currency,
       type: looksLikeCredit ? "Credito" : "Gasto",
-      originalLine: line
+      originalLine: line,
       includeInTotals: true,
-manualAmount: null
+      manualAmount: null
     };
   }
 
@@ -639,13 +595,7 @@ manualAmount: null
 
     if (!description || description.length < 3) return null;
 
-    const rowMeta = rawRows.find((r) => (r?.line || "").includes(trimmed.slice(0, 30)));
-    const tokenXs = (rowMeta?.amountTokens || []).map((t) => t.x).sort((a, b) => a - b);
-
-    const hasRightMostAmount = tokenXs.length >= 2 && tokenXs[tokenXs.length - 1] - tokenXs[0] > 120;
-    const currency = hasRightMostAmount
-      ? "USD"
-      : detectFicohsaCurrency(trimmed, description, rawAmount, amount);
+    const currency = detectFicohsaCurrency(trimmed, description, rawAmount, amount);
 
     return buildTransaction({
       date: dateMatch[1],
@@ -656,111 +606,6 @@ manualAmount: null
       forceCredit: isCreditTransaction(`${rawAmount} ${description}`),
       originalLine: line
     });
-  }
-
-  // ---------- BAC / genéricas (mantenidas) ----------
-  function parseBacLine(line) {
-    if (profiles.bac.skip?.test(line)) return null;
-
-    const installmentMatch = parseBacInstallmentLine(line);
-    if (installmentMatch) return installmentMatch;
-
-    const bacMatch = line.match(/^(\d{1,2})\s+\d{6,}\s+([A-Z]{3})\/(\d{1,2})\s+(.+?)\s+((?:L\.?|HNL|USD|US\$|\$)?\s*-?(?:\d{1,3}(?:,\d{3})+|\d+)(?:\.\d{2})-?)\s*$/i);
-    if (!bacMatch) return parseGenericBacLine(line);
-
-    const [, , monthText, dayText, rawDescription, rawAmount] = bacMatch;
-    const date = formatBacDate(dayText, monthText);
-    const description = cleanDescription(rawDescription);
-    const amount = parseAmount(rawAmount);
-    if (!description || !Number.isFinite(amount)) return null;
-
-    const credit = isCreditTransaction(`${rawAmount} ${description}`);
-    return {
-      id: crypto.randomUUID(),
-      date,
-      description,
-      category: categorize(description),
-      amount: Math.abs(amount),
-      signedAmount: credit ? -Math.abs(amount) : Math.abs(amount),
-      currency: detectCurrency(line),
-      type: credit ? "Credito" : "Gasto",
-      originalLine: line
-    };
-  }
-
-  function parseBacInstallmentLine(line) {
-    const match = line.match(/^(?:(\d{1,2})\s+)?(?:\d{6,}\s+)?([A-Z]{3})\/(\d{1,2})\s+(.+?(?:CUOTA\s*:?\s*\d{1,2}\/\d{1,3}|CREDOMATIC\s+EXTRAF|EXTRAF|EXTRAFINANCIAMIENTO).*?)\s+((?:L\.?|HNL|USD|US\$|\$)?\s*-?(?:\d{1,3}(?:,\d{3})+|\d+)(?:\.\d{2})-?)\s*$/i);
-    if (!match) return null;
-
-    const [, , monthText, dayText, rawDescription, rawAmount] = match;
-    const description = cleanDescription(rawDescription);
-    const amount = parseAmount(rawAmount);
-    if (!description || !Number.isFinite(amount)) return null;
-
-    const credit = isCreditTransaction(`${rawAmount} ${description}`);
-    return {
-      id: crypto.randomUUID(),
-      date: formatBacDate(dayText, monthText),
-      description,
-      category: "Cuotas / financiamiento",
-      amount: Math.abs(amount),
-      signedAmount: credit ? -Math.abs(amount) : Math.abs(amount),
-      currency: detectCurrency(line),
-      type: credit ? "Credito" : "Gasto",
-      originalLine: line
-    };
-  }
-
-  function parseGenericBacLine(line) {
-    const genericMatch = line.match(/^(?:\d{1,2}\s+)?(?:\d{6,}\s+)?([A-Z]{3})\/(\d{1,2})\s+(.+?)\s+((?:L\.?|HNL|USD|US\$|\$)?\s*-?(?:\d{1,3}(?:,\d{3})+|\d+)(?:\.\d{2})-?)\s*$/i);
-    if (!genericMatch) return null;
-
-    const [, monthText, dayText, rawDescription, rawAmount] = genericMatch;
-    const description = cleanDescription(rawDescription);
-    const amount = parseAmount(rawAmount);
-    if (!description || !Number.isFinite(amount)) return null;
-
-    const credit = isCreditTransaction(`${rawAmount} ${description}`);
-    return {
-      id: crypto.randomUUID(),
-      date: formatBacDate(dayText, monthText),
-      description,
-      category: categorize(description),
-      amount: Math.abs(amount),
-      signedAmount: credit ? -Math.abs(amount) : Math.abs(amount),
-      currency: detectCurrency(line),
-      type: credit ? "Credito" : "Gasto",
-      originalLine: line
-    };
-  }
-
-  function parseBacInstallmentRows(text, existingRows) {
-    const existingKeys = new Set(existingRows.map((item) => `${item.description}|${item.amount.toFixed(2)}`));
-    const lines = text.split(/\n+/).map((line) => line.trim()).filter(Boolean);
-
-    return lines
-      .filter((line) => /(?:[A-Z]{3}\/\d{1,2}).*(?:CUOTA\s*:?\s*\d{1,2}\/\d{1,3}|CREDOMATIC\s+EXTRAF|EXTRAF|EXTRAFINANCIAMIENTO)/i.test(line))
-      .filter((line) => !/l[ií]mite|disponible|utilizado|intereses\s+(?:corrientes|por)|monto\s+extrafinanciamiento\s+utilizado|l[ií]mite\s+global/i.test(line))
-      .map((line) => {
-        const transaction = parseBacInstallmentLine(line) || parseGenericBacLine(line);
-        if (!transaction) return null;
-        transaction.category = "Cuotas / financiamiento";
-        const key = `${transaction.description}|${transaction.amount.toFixed(2)}`;
-        if (existingKeys.has(key)) return null;
-        return transaction;
-      })
-      .filter(Boolean);
-  }
-
-  function formatBacDate(dayText, monthText) {
-    const months = { ENE:"01", FEB:"02", MAR:"03", ABR:"04", MAY:"05", JUN:"06", JUL:"07", AGO:"08", SEP:"09", OCT:"10", NOV:"11", DIC:"12" };
-    const day = String(dayText).padStart(2, "0");
-    const month = months[String(monthText).slice(0,3).toUpperCase()] || "01";
-    return `${day}/${month}/${new Date().getFullYear()}`;
-  }
-
-  function cleanDescription(description) {
-    return description.replace(/\bHN\b/gi, "").replace(/\s+/g, " ").trim();
   }
 
   function parseAmount(value) {
@@ -785,31 +630,27 @@ manualAmount: null
 
   function detectFicohsaCurrency(line, description, rawAmount, amount) {
     if (detectCurrency(`${line} ${rawAmount}`) === "USD") return "USD";
-    if (hasFicohsaForeignMarker(description)) return "USD";
+    if (/\b(?:WA|FL|CA|TX|NY|NJ|GA|AZ|IL|PA|US|USA)\b|amazon|google|apple|paypal|microsoft|netflix|spotify/i.test(description)) return "USD";
     if (/gracias\s+por\s+su\s+pago/i.test(description) && Math.abs(amount) < 100) return "USD";
     return "HNL";
-  }
-
-  function hasFicohsaForeignMarker(description) {
-    return /\b(?:WA|FL|CA|TX|NY|NJ|GA|AZ|IL|PA|US|USA)\b|amazon|google|apple|paypal|microsoft|netflix|spotify/i.test(description);
   }
 
   function buildTransaction({ date, description, category, rawAmount, currency, forceCredit, originalLine }) {
     const amount = parseAmount(rawAmount);
     const credit = forceCredit || isCreditTransaction(`${rawAmount} ${description}`);
-   return {
-  id: crypto.randomUUID(),
-  date,
-  description,
-  category,
-  amount: Math.abs(amount),
-  signedAmount: credit ? -Math.abs(amount) : Math.abs(amount),
-  currency,
-  type: credit ? "Credito" : "Gasto",
-  originalLine,
-  includeInTotals: true,
-  manualAmount: null
-};
+    return {
+      id: crypto.randomUUID(),
+      date,
+      description,
+      category,
+      amount: Math.abs(amount),
+      signedAmount: credit ? -Math.abs(amount) : Math.abs(amount),
+      currency,
+      type: credit ? "Credito" : "Gasto",
+      originalLine,
+      includeInTotals: true,
+      manualAmount: null
+    };
   }
 
   function selectAmount(amounts, mode) {
@@ -843,81 +684,79 @@ manualAmount: null
     return found ? found[0] : "Otros";
   }
 
- function render() {
-  const rows = getFilteredTransactions();
-  body.innerHTML = "";
+  function render() {
+    const rows = getFilteredTransactions();
+    body.innerHTML = "";
 
-  const tableHeadRow = document.querySelector("thead tr");
-  if (tableHeadRow && !document.querySelector("#thInclude")) {
-    const th = document.createElement("th");
-    th.id = "thInclude";
-    th.textContent = "Incluir";
-    tableHeadRow.appendChild(th);
+    const tableHeadRow = document.querySelector("thead tr");
+    if (tableHeadRow && !document.querySelector("#thInclude")) {
+      const th = document.createElement("th");
+      th.id = "thInclude";
+      th.textContent = "Incluir";
+      tableHeadRow.appendChild(th);
+    }
+
+    if (rows.length === 0) {
+      body.innerHTML = '<tr><td class="empty" colspan="7">No hay movimientos para mostrar.</td></tr>';
+    } else {
+      rows.forEach((transaction) => {
+        const row = document.createElement("tr");
+        row.innerHTML = `
+          <td>${escapeHtml(transaction.date)}</td>
+          <td>${escapeHtml(transaction.description)}</td>
+          <td>${categorySelect(transaction)}</td>
+          <td class="amount">${amountInput(transaction)}</td>
+          <td>${currencySelect(transaction)}</td>
+          <td>${transaction.type}</td>
+          <td>${includeSelect(transaction)}</td>
+        `;
+        body.appendChild(row);
+      });
+    }
+
+    body.querySelectorAll("select[data-id]").forEach((select) => {
+      select.addEventListener("change", () => {
+        const transaction = state.transactions.find((item) => item.id === select.dataset.id);
+        if (!transaction) return;
+        transaction.category = select.value;
+        render();
+      });
+    });
+
+    body.querySelectorAll("select[data-currency-id]").forEach((select) => {
+      select.addEventListener("change", () => {
+        const transaction = state.transactions.find((item) => item.id === select.dataset.currencyId);
+        if (!transaction) return;
+        transaction.currency = select.value;
+        render();
+      });
+    });
+
+    body.querySelectorAll("select[data-include-id]").forEach((select) => {
+      select.addEventListener("change", () => {
+        const transaction = state.transactions.find((item) => item.id === select.dataset.includeId);
+        if (!transaction) return;
+        transaction.includeInTotals = select.value === "yes";
+        render();
+      });
+    });
+
+    body.querySelectorAll("input[data-amount-id]").forEach((input) => {
+      input.addEventListener("change", () => {
+        const transaction = state.transactions.find((item) => item.id === input.dataset.amountId);
+        if (!transaction) return;
+        const parsed = Number(input.value);
+        if (!Number.isFinite(parsed)) return;
+        transaction.manualAmount = parsed;
+        transaction.signedAmount = parsed;
+        transaction.amount = Math.abs(parsed);
+        transaction.type = parsed < 0 ? "Credito" : "Gasto";
+        render();
+      });
+    });
+
+    updateMetrics(rows);
   }
-
-  if (rows.length === 0) {
-    body.innerHTML = '<tr><td class="empty" colspan="7">No hay movimientos para mostrar.</td></tr>';
-  } else {
-    rows.forEach((transaction) => {
-      const row = document.createElement("tr");
-      row.innerHTML = `
-        <td>${escapeHtml(transaction.date)}</td>
-        <td>${escapeHtml(transaction.description)}</td>
-        <td>${categorySelect(transaction)}</td>
-        <td class="amount">${amountInput(transaction)}</td>
-        <td>${currencySelect(transaction)}</td>
-        <td>${transaction.type}</td>
-        <td>${includeSelect(transaction)}</td>
-      `;
-      body.appendChild(row);
-    });
-  }
-
-  body.querySelectorAll("select[data-id]").forEach((select) => {
-    select.addEventListener("change", () => {
-      const transaction = state.transactions.find((item) => item.id === select.dataset.id);
-      if (!transaction) return;
-      transaction.category = select.value;
-      render();
-    });
-  });
-
-  body.querySelectorAll("select[data-currency-id]").forEach((select) => {
-    select.addEventListener("change", () => {
-      const transaction = state.transactions.find((item) => item.id === select.dataset.currencyId);
-      if (!transaction) return;
-      transaction.currency = select.value;
-      render();
-    });
-  });
-
-  body.querySelectorAll("select[data-include-id]").forEach((select) => {
-    select.addEventListener("change", () => {
-      const transaction = state.transactions.find((item) => item.id === select.dataset.includeId);
-      if (!transaction) return;
-      transaction.includeInTotals = select.value === "yes";
-      render();
-    });
-  });
-
-  body.querySelectorAll("input[data-amount-id]").forEach((input) => {
-    input.addEventListener("change", () => {
-      const transaction = state.transactions.find((item) => item.id === input.dataset.amountId);
-      if (!transaction) return;
-
-      const parsed = Number(input.value);
-      if (!Number.isFinite(parsed)) return;
-
-      transaction.manualAmount = parsed;
-      transaction.signedAmount = parsed;
-      transaction.amount = Math.abs(parsed);
-      transaction.type = parsed < 0 ? "Credito" : "Gasto";
-      render();
-    });
-  });
-
-  updateMetrics(rows);
-}
 
   function getFilteredTransactions() {
     const search = searchInput.value.trim().toLowerCase();
@@ -938,97 +777,91 @@ manualAmount: null
       return `<option value="${escapeHtml(category)}" ${selected}>${escapeHtml(category)}</option>`;
     }).join("");
     return `<select class="category" data-id="${transaction.id}">${options}</select>`;
-  } function currencySelect(transaction) {
-  return `
-    <select data-currency-id="${transaction.id}">
-      <option value="HNL" ${transaction.currency === "HNL" ? "selected" : ""}>HNL</option>
-      <option value="USD" ${transaction.currency === "USD" ? "selected" : ""}>USD</option>
-    </select>
-  `;
-}
+  }
 
-function includeSelect(transaction) {
-  const include = transaction.includeInTotals !== false;
-  return `
-    <select data-include-id="${transaction.id}">
-      <option value="yes" ${include ? "selected" : ""}>Si</option>
-      <option value="no" ${!include ? "selected" : ""}>No</option>
-    </select>
-  `;
-}
+  function currencySelect(transaction) {
+    return `
+      <select data-currency-id="${transaction.id}">
+        <option value="HNL" ${transaction.currency === "HNL" ? "selected" : ""}>HNL</option>
+        <option value="USD" ${transaction.currency === "USD" ? "selected" : ""}>USD</option>
+      </select>
+    `;
+  }
 
-function amountInput(transaction) {
-  const value = Number(transaction.signedAmount || 0).toFixed(2);
-  return `<input data-amount-id="${transaction.id}" type="number" step="0.01" value="${value}" style="width:120px;text-align:right;">`;
-}
+  function includeSelect(transaction) {
+    const include = transaction.includeInTotals !== false;
+    return `
+      <select data-include-id="${transaction.id}">
+        <option value="yes" ${include ? "selected" : ""}>Si</option>
+        <option value="no" ${!include ? "selected" : ""}>No</option>
+      </select>
+    `;
+  }
 
- function updateMetrics(filteredRows = getFilteredTransactions()) {
-  const all = state.transactions;
-  const includedAll = all.filter((item) => item.includeInTotals !== false);
-  const includedFiltered = filteredRows.filter((item) => item.includeInTotals !== false);
+  function amountInput(transaction) {
+    const value = Number(transaction.signedAmount || 0).toFixed(2);
+    return `<input data-amount-id="${transaction.id}" type="number" step="0.01" value="${value}" style="width:120px;text-align:right;">`;
+  }
 
-  const hnlRows = includedAll.filter((item) => item.currency === "HNL");
-  const filteredHnlRows = includedFiltered.filter((item) => item.currency === "HNL");
-  const filteredUsdRows = includedFiltered.filter((item) => item.currency === "USD");
+  function updateMetrics(filteredRows = getFilteredTransactions()) {
+    const all = state.transactions;
+    const includedAll = all.filter((item) => item.includeInTotals !== false);
+    const includedFiltered = filteredRows.filter((item) => item.includeInTotals !== false);
 
-  const hnlDebits = hnlRows.filter(
-    (item) =>
+    const hnlRows = includedAll.filter((item) => item.currency === "HNL");
+    const filteredHnlRows = includedFiltered.filter((item) => item.currency === "HNL");
+    const filteredUsdRows = includedFiltered.filter((item) => item.currency === "USD");
+
+    const hnlDebits = hnlRows.filter((item) =>
       item.signedAmount > 0 &&
       item.category !== "Saldo anterior" &&
       !/saldo anterior/i.test(item.description)
-  );
+    );
+    const hnlCredits = hnlRows.filter((item) => item.signedAmount < 0);
 
-  const hnlCredits = hnlRows.filter((item) => item.signedAmount < 0);
+    const categoryTotals = new Map();
+    const sourceForTop = includedFiltered.length ? includedFiltered : includedAll;
+    sourceForTop
+      .filter((item) => item.signedAmount > 0 && item.category !== "Saldo anterior")
+      .forEach((item) => {
+        categoryTotals.set(item.category, (categoryTotals.get(item.category) || 0) + item.signedAmount);
+      });
 
-  const categoryTotals = new Map();
-  const sourceForTop = includedFiltered.length ? includedFiltered : includedAll;
-  sourceForTop
-    .filter((item) => item.signedAmount > 0 && item.category !== "Saldo anterior")
-    .forEach((item) => {
-      categoryTotals.set(item.category, (categoryTotals.get(item.category) || 0) + item.signedAmount);
-    });
+    const topCategory = [...categoryTotals.entries()].sort((a, b) => b[1] - a[1])[0];
 
-  const topCategory = [...categoryTotals.entries()].sort((a, b) => b[1] - a[1])[0];
-
-  document.querySelector("#countMetric").textContent = includedAll.length;
-  document.querySelector("#debitMetric").textContent = `L ${formatMoney(sumSigned(hnlDebits))}`;
-  document.querySelector("#creditMetric").textContent = `L ${formatMoney(sumSigned(hnlCredits))}`;
-  document.querySelector("#topCategoryMetric").textContent = topCategory ? topCategory[0] : "-";
-  document.querySelector("#filteredMetric").textContent = `L ${formatMoney(sumSigned(filteredHnlRows))}`;
-  document.querySelector("#filteredUsdMetric").textContent = `${filteredUsdRows.length} mov. / $ ${formatMoney(sumSigned(filteredUsdRows))}`;
-}
+    document.querySelector("#countMetric").textContent = includedAll.length;
+    document.querySelector("#debitMetric").textContent = `L ${formatMoney(sumSigned(hnlDebits))}`;
+    document.querySelector("#creditMetric").textContent = `L ${formatMoney(sumSigned(hnlCredits))}`;
+    document.querySelector("#topCategoryMetric").textContent = topCategory ? topCategory[0] : "-";
+    document.querySelector("#filteredMetric").textContent = `L ${formatMoney(sumSigned(filteredHnlRows))}`;
+    document.querySelector("#filteredUsdMetric").textContent = `${filteredUsdRows.length} mov. / $ ${formatMoney(sumSigned(filteredUsdRows))}`;
+  }
 
   function exportRows(rows, filename) {
-    if (rows.length === 0) {
+    const exportable = rows.filter((item) => item.includeInTotals !== false);
+    if (exportable.length === 0) {
       setStatus("No hay movimientos filtrados para exportar.", "warn");
       return;
     }
 
     const header = ["Fecha", "Descripcion", "Categoria", "Monto", "Moneda", "Tipo"];
-    const lines = rows.map((item) => [
-      item.date,
-      item.description,
-      item.category,
-      item.signedAmount.toFixed(2),
-      item.currency,
-      item.type
+    const lines = exportable.map((item) => [
+      item.date, item.description, item.category, item.signedAmount.toFixed(2), item.currency, item.type
     ]);
 
-    const csv = [header, ...lines]
-      .map((row) => row.map(csvCell).join(","))
-      .join("\n");
-
+    const csv = [header, ...lines].map((row) => row.map(csvCell).join(",")).join("\n");
     const blob = new Blob([csv], { type: "text/csv;charset=utf-8" });
     const link = document.createElement("a");
     link.href = URL.createObjectURL(blob);
     link.download = filename;
     link.click();
     URL.revokeObjectURL(link.href);
-    setStatus(`Exportados ${rows.length} movimientos filtrados.`, "ok");
+    setStatus(`Exportados ${exportable.length} movimientos filtrados.`, "ok");
   }
 
   function exportFilteredPdf(rows) {
-    if (rows.length === 0) {
+    const exportable = rows.filter((item) => item.includeInTotals !== false);
+    if (exportable.length === 0) {
       setStatus("No hay movimientos filtrados para exportar en PDF.", "warn");
       return;
     }
@@ -1044,8 +877,8 @@ function amountInput(transaction) {
     const category = categoryFilter.value || "Todas";
     const currency = currencyFilter.value || "Todas";
     const search = searchInput.value.trim() || "Sin busqueda";
-    const totalHnl = sumSigned(rows.filter((item) => item.currency === "HNL"));
-    const totalUsd = sumSigned(rows.filter((item) => item.currency === "USD"));
+    const totalHnl = sumSigned(exportable.filter((item) => item.currency === "HNL"));
+    const totalUsd = sumSigned(exportable.filter((item) => item.currency === "USD"));
     let y = 42;
 
     doc.setFont("helvetica", "bold");
@@ -1058,7 +891,7 @@ function amountInput(transaction) {
     doc.text(`Categoria: ${category}`, margin, y); y += 14;
     doc.text(`Moneda: ${currency}`, margin, y); y += 14;
     doc.text(`Busqueda: ${search}`, margin, y); y += 14;
-    doc.text(`Movimientos: ${rows.length}`, margin, y); y += 14;
+    doc.text(`Movimientos: ${exportable.length}`, margin, y); y += 14;
     doc.text(`Saldo filtrado L: L ${formatMoney(totalHnl)}`, margin, y); y += 14;
     doc.text(`USD aislado: $ ${formatMoney(totalUsd)} (no mezclado con lempiras)`, margin, y);
 
@@ -1066,7 +899,7 @@ function amountInput(transaction) {
     drawPdfHeader(doc, margin, y);
     y += 18;
 
-    rows.forEach((item) => {
+    exportable.forEach((item) => {
       if (y > 730) {
         doc.addPage();
         y = 42;
@@ -1085,7 +918,7 @@ function amountInput(transaction) {
     });
 
     doc.save("movimientos_filtrados_ficohsa.pdf");
-    setStatus(`PDF generado con ${rows.length} movimientos filtrados.`, "ok");
+    setStatus(`PDF generado con ${exportable.length} movimientos filtrados.`, "ok");
   }
 
   function drawPdfHeader(doc, x, y) {
@@ -1104,10 +937,7 @@ function amountInput(transaction) {
   }
 
   function formatMoney(value) {
-    return Number(value || 0).toLocaleString("en-US", {
-      minimumFractionDigits: 2,
-      maximumFractionDigits: 2
-    });
+    return Number(value || 0).toLocaleString("en-US", { minimumFractionDigits: 2, maximumFractionDigits: 2 });
   }
 
   function formatSignedAmount(item) {
@@ -1124,11 +954,8 @@ function amountInput(transaction) {
 
   function escapeHtml(value) {
     return String(value ?? "")
-      .replace(/&/g, "&amp;")
-      .replace(/</g, "&lt;")
-      .replace(/>/g, "&gt;")
-      .replace(/"/g, "&quot;")
-      .replace(/'/g, "&#039;");
+      .replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;")
+      .replace(/"/g, "&quot;").replace(/'/g, "&#039;");
   }
 
   function setStatus(message, level = "") {
