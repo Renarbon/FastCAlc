@@ -319,767 +319,750 @@
     </section>
   </main>
 
-  <script type="module">
-    import * as pdfjs from "https://cdnjs.cloudflare.com/ajax/libs/pdf.js/4.10.38/pdf.min.mjs";
+ <script type="module">
+  import * as pdfjs from "https://cdnjs.cloudflare.com/ajax/libs/pdf.js/4.10.38/pdf.min.mjs";
 
-    pdfjs.GlobalWorkerOptions.workerSrc = "https://cdnjs.cloudflare.com/ajax/libs/pdf.js/4.10.38/pdf.worker.min.mjs";
+  pdfjs.GlobalWorkerOptions.workerSrc = "https://cdnjs.cloudflare.com/ajax/libs/pdf.js/4.10.38/pdf.worker.min.mjs";
 
-    const categories = [
-      "Saldo anterior",
-      "Supermercado",
-      "Comer fuera",
-      "Cuotas / financiamiento",
-      "Appliances",
-      "Gasolina",
-      "Servicios",
-      "Salud",
-      "Transporte",
-      "Compras",
-      "Entretenimiento",
-      "Banco / cargos",
-      "Otros"
-    ];
+  const categories = [
+    "Saldo anterior",
+    "Supermercado",
+    "Comer fuera",
+    "Cuotas / financiamiento",
+    "Appliances",
+    "Gasolina",
+    "Servicios",
+    "Salud",
+    "Transporte",
+    "Compras",
+    "Entretenimiento",
+    "Banco / cargos",
+    "Otros"
+  ];
 
-    const categoryRules = [
-      ["Saldo anterior", /saldo\s+anterior/i],
-      ["Banco / cargos", /membresia|membresía/i],
-      ["Comer fuera", /price\s*smart.*comida|pricesmart.*comida|cafeteria|cafetería/i],
-      ["Cuotas / financiamiento", /extrafinanciamiento|extra\s*financiamiento|financiamiento|cuota|saldo\s+extra/i],
-      ["Supermercado", /super|supermercado|paiz|walmart|price\s*smart|pricesmart|la colonia|colonial|despensa|maxi despensa|dippsa market/i],
-      ["Comer fuera", /rest|restaurant|burger|pizza|cafe|coffee|kfc|wendy|mcdonald|denny|popeyes|little caesars|comida|ubereats|pedidos/i],
-      ["Appliances", /jetstereo|diunsa|la curacao|elektra|ladylee|acosa|office depot|tecnologia|electronica|appliance/i],
-      ["Gasolina", /gas|gasolinera|uno|puma|texaco|shell|dippsa|combustible/i],
-      ["Servicios", /enee|sanaa|tigo|claro|internet|telefono|energia|agua|servicio|hondutel/i],
-      ["Salud", /farmacia|pharmacy|hospital|clinica|medico|laboratorio|siman farm|kielsa|farsiman/i],
-      ["Transporte", /uber|taxi|indrive|parking|peaje|estacionamiento/i],
-      ["Entretenimiento", /netflix|spotify|cinemark|cine|disney|steam|playstation|xbox|google|apple/i],
-      ["Banco / cargos", /interes|financiamiento|membresia|membresía|cargo|comision|comisión|seguro|pago|ficohsa|retiro|atm|ach|descuento/i],
-      ["Compras", /amazon|shein|zara|bershka|mall|tienda|shop|store|paypal/i]
-    ];
+  const categoryRules = [
+    ["Saldo anterior", /saldo\s+anterior/i],
+    ["Banco / cargos", /membresia|membresía/i],
+    ["Comer fuera", /price\s*smart.*comida|pricesmart.*comida|cafeteria|cafetería/i],
+    ["Cuotas / financiamiento", /extrafinanciamiento|extra\s*financiamiento|financiamiento|cuota|saldo\s+extra/i],
+    ["Supermercado", /super|supermercado|paiz|walmart|price\s*smart|pricesmart|la colonia|colonial|despensa|maxi despensa|dippsa market/i],
+    ["Comer fuera", /rest|restaurant|burger|pizza|cafe|coffee|kfc|wendy|mcdonald|denny|popeyes|little caesars|comida|ubereats|pedidos/i],
+    ["Appliances", /jetstereo|diunsa|la curacao|elektra|ladylee|acosa|office depot|tecnologia|electronica|appliance/i],
+    ["Gasolina", /gas|gasolinera|uno|puma|texaco|shell|dippsa|combustible/i],
+    ["Servicios", /enee|sanaa|tigo|claro|internet|telefono|energia|agua|servicio|hondutel/i],
+    ["Salud", /farmacia|pharmacy|hospital|clinica|medico|laboratorio|siman farm|kielsa|farsiman/i],
+    ["Transporte", /uber|taxi|indrive|parking|peaje|estacionamiento/i],
+    ["Entretenimiento", /netflix|spotify|cinemark|cine|disney|steam|playstation|xbox|google|apple/i],
+    ["Banco / cargos", /interes|financiamiento|membresia|membresía|cargo|comision|comisión|seguro|pago|ficohsa|retiro|atm|ach|descuento/i],
+    ["Compras", /amazon|shein|zara|bershka|mall|tienda|shop|store|paypal/i]
+  ];
 
-    const profiles = {
-      ficohsa: {
-        label: "Ficohsa",
-        amountMode: "first",
-        skip: /saldo anterior|saldo actual|limite|l[ií]mite|fecha descripci[oó]n|total/i
-      },
-      bac: {
-        label: "BAC",
-        amountMode: "last",
-        skip: /saldo anterior|saldo actual|pago minimo|pago m[ií]nimo|fecha de corte|limite|l[ií]mite|total/i
-      },
-      banpais: {
-        label: "Banpais",
-        amountMode: "first",
-        skip: /saldo anterior|saldo actual|fecha transacci[oó]n|fecha posteo|limite|l[ií]mite|total/i
-      },
-      promerica: {
-        label: "Promerica",
-        amountMode: "last",
-        skip: /saldo anterior|saldo actual|fecha transacci[oó]n|fecha posteo|pago contado|limite|l[ií]mite|total/i
-      }
-    };
+  const profiles = {
+    ficohsa: {
+      label: "Ficohsa",
+      amountMode: "first",
+      skip: /saldo anterior|saldo actual|limite|l[ií]mite|fecha descripci[oó]n|total/i
+    },
+    bac: {
+      label: "BAC",
+      amountMode: "last",
+      skip: /saldo anterior|saldo actual|pago minimo|pago m[ií]nimo|fecha de corte|limite|l[ií]mite|total/i
+    },
+    banpais: {
+      label: "Banpais",
+      amountMode: "first",
+      skip: /saldo anterior|saldo actual|fecha transacci[oó]n|fecha posteo|limite|l[ií]mite|total/i
+    },
+    promerica: {
+      label: "Promerica",
+      amountMode: "last",
+      skip: /saldo anterior|saldo actual|fecha transacci[oó]n|fecha posteo|pago contado|limite|l[ií]mite|total/i
+    }
+  };
 
-    const state = {
-      transactions: [],
-      rawText: "",
-      selectedProfile: "auto",
-      activeProfile: "auto"
-    };
+  const state = {
+    transactions: [],
+    rawText: "",
+    rawRows: [],
+    selectedProfile: "auto",
+    activeProfile: "auto"
+  };
 
-    const fileInput = document.querySelector("#pdfFile");
-    const bankSelect = document.querySelector("#bankSelect");
-    const readButton = document.querySelector("#readButton");
-    const exportButton = document.querySelector("#exportButton");
-    const sheetsButton = document.querySelector("#sheetsButton");
-    const pdfButton = document.querySelector("#pdfButton");
-    const searchInput = document.querySelector("#searchInput");
-    const categoryFilter = document.querySelector("#categoryFilter");
-    const currencyFilter = document.querySelector("#currencyFilter");
-    const status = document.querySelector("#status");
-    const body = document.querySelector("#transactionsBody");
+  const fileInput = document.querySelector("#pdfFile");
+  const bankSelect = document.querySelector("#bankSelect");
+  const readButton = document.querySelector("#readButton");
+  const exportButton = document.querySelector("#exportButton");
+  const sheetsButton = document.querySelector("#sheetsButton");
+  const pdfButton = document.querySelector("#pdfButton");
+  const searchInput = document.querySelector("#searchInput");
+  const categoryFilter = document.querySelector("#categoryFilter");
+  const currencyFilter = document.querySelector("#currencyFilter");
+  const status = document.querySelector("#status");
+  const body = document.querySelector("#transactionsBody");
 
-    categories.forEach((category) => {
-      const option = document.createElement("option");
-      option.value = category;
-      option.textContent = category;
-      categoryFilter.appendChild(option);
-    });
+  categories.forEach((category) => {
+    const option = document.createElement("option");
+    option.value = category;
+    option.textContent = category;
+    categoryFilter.appendChild(option);
+  });
 
-    readButton.addEventListener("click", readPdf);
-    bankSelect.addEventListener("change", () => {
-      state.selectedProfile = bankSelect.value;
-      if (state.rawText) {
-        state.transactions = parseTransactions(state.rawText);
-        setStatus(`Perfil ${profileLabel(state.activeProfile)}: ${state.transactions.length} movimientos detectados.`, state.transactions.length ? "ok" : "warn");
-        render();
-      }
-    });
-    exportButton.addEventListener("click", () => exportRows(getFilteredTransactions(), "movimientos_filtrados_ficohsa.csv"));
-    sheetsButton.addEventListener("click", () => exportRows(getFilteredTransactions(), "movimientos_filtrados_google_sheets.csv"));
-    pdfButton.addEventListener("click", () => exportFilteredPdf(getFilteredTransactions()));
-    searchInput.addEventListener("input", render);
-    categoryFilter.addEventListener("change", render);
-    currencyFilter.addEventListener("change", render);
-
-    async function readPdf() {
-      const file = fileInput.files[0];
-      if (!file) {
-        setStatus("Selecciona primero el estado de cuenta PDF.", "warn");
-        return;
-      }
-
-      setStatus("Leyendo PDF...");
-      document.querySelector("#fileMetric").textContent = file.name;
-      document.querySelector("#fileMetric").title = file.name;
-
-      const data = new Uint8Array(await file.arrayBuffer());
-      const pdf = await pdfjs.getDocument({ data }).promise;
-      const pages = [];
-
-      for (let pageNumber = 1; pageNumber <= pdf.numPages; pageNumber += 1) {
-        const page = await pdf.getPage(pageNumber);
-        const content = await page.getTextContent();
-        pages.push(textItemsToRows(content.items).join("\n"));
-      }
-
-      state.rawText = pages.join("\n\n");
-      document.querySelector("#rawText").textContent = state.rawText;
-      state.transactions = parseTransactions(state.rawText);
-
-      if (state.transactions.length === 0) {
-        setStatus("No pude detectar movimientos automaticamente. Abre 'Ver texto extraido' para ajustar el patron.", "warn");
-      } else {
-        setStatus(`Listo: ${state.transactions.length} movimientos detectados con perfil ${profileLabel(state.activeProfile)}.`, "ok");
-      }
-
+  readButton.addEventListener("click", readPdf);
+  bankSelect.addEventListener("change", () => {
+    state.selectedProfile = bankSelect.value;
+    if (state.rawText) {
+      state.transactions = parseTransactions(state.rawText, state.rawRows);
+      setStatus(`Perfil ${profileLabel(state.activeProfile)}: ${state.transactions.length} movimientos detectados.`, state.transactions.length ? "ok" : "warn");
       render();
     }
+  });
+  exportButton.addEventListener("click", () => exportRows(getFilteredTransactions(), "movimientos_filtrados_ficohsa.csv"));
+  sheetsButton.addEventListener("click", () => exportRows(getFilteredTransactions(), "movimientos_filtrados_google_sheets.csv"));
+  pdfButton.addEventListener("click", () => exportFilteredPdf(getFilteredTransactions()));
+  searchInput.addEventListener("input", render);
+  categoryFilter.addEventListener("change", render);
+  currencyFilter.addEventListener("change", render);
 
-    function textItemsToRows(items) {
-      const rows = [];
-
-      items
-        .filter((item) => item.str && item.str.trim())
-        .map((item) => ({
-          text: item.str.trim(),
-          x: item.transform[4],
-          y: Math.round(item.transform[5] / 3) * 3
-        }))
-        .sort((a, b) => b.y - a.y || a.x - b.x)
-        .forEach((item) => {
-          let row = rows.find((candidate) => Math.abs(candidate.y - item.y) <= 3);
-          if (!row) {
-            row = { y: item.y, parts: [] };
-            rows.push(row);
-          }
-          row.parts.push(item);
-        });
-
-      return rows
-        .sort((a, b) => b.y - a.y)
-        .map((row) => row.parts
-          .sort((a, b) => a.x - b.x)
-          .map((part) => part.text)
-          .join(" ")
-          .replace(/\s+/g, " ")
-          .trim())
-        .filter(Boolean);
+  async function readPdf() {
+    const file = fileInput.files[0];
+    if (!file) {
+      setStatus("Selecciona primero el estado de cuenta PDF.", "warn");
+      return;
     }
 
-    function parseTransactions(text) {
-      if (state.selectedProfile === "auto") {
-        const attempts = Object.keys(profiles).map((profileKey) => ({
-          profileKey,
-          rows: parseTransactionsWithProfile(text, profileKey)
-        }));
-        attempts.sort((a, b) => b.rows.length - a.rows.length);
-        state.activeProfile = attempts[0]?.profileKey || "auto";
-        return attempts[0]?.rows || [];
-      }
+    setStatus("Leyendo PDF...");
+    document.querySelector("#fileMetric").textContent = file.name;
+    document.querySelector("#fileMetric").title = file.name;
 
-      state.activeProfile = state.selectedProfile;
-      return parseTransactionsWithProfile(text, state.selectedProfile);
+    const data = new Uint8Array(await file.arrayBuffer());
+    const pdf = await pdfjs.getDocument({ data }).promise;
+    const pages = [];
+    const structuredRows = [];
+
+    for (let pageNumber = 1; pageNumber <= pdf.numPages; pageNumber += 1) {
+      const page = await pdf.getPage(pageNumber);
+      const content = await page.getTextContent();
+
+      const pageRows = textItemsToRows(content.items).map((raw) => {
+        try {
+          return JSON.parse(raw);
+        } catch {
+          return { line: raw, amountTokens: [] };
+        }
+      });
+
+      structuredRows.push(...pageRows);
+      pages.push(pageRows.map((r) => r.line).join("\n"));
     }
 
-    function parseTransactionsWithProfile(text, profileKey) {
-      const datePattern = "(?:\\d{1,2}[/-]\\d{1,2}(?:[/-]\\d{2,4})?|\\d{1,2}[-\\s]+(?:ENE|FEB|MAR|ABR|MAY|JUN|JUL|AGO|SEP|OCT|NOV|DIC)\\.?\\s*(?:\\d{2,4})?)";
-      const normalized = text
-        .replace(new RegExp(`\\b(${datePattern})\\b`, "gi"), "\n$1")
-        .replace(/[ \t]{2,}/g, " ");
+    state.rawRows = structuredRows;
+    state.rawText = pages.join("\n\n");
+    document.querySelector("#rawText").textContent = state.rawText;
+    state.transactions = parseTransactions(state.rawText, state.rawRows);
 
-      const directRows = normalized
-        .split(/\n+/)
-        .map((line) => line.trim())
-        .filter(Boolean)
-        .flatMap((line) => parseLine(line, profileKey) || [])
-        .filter(Boolean);
-
-      const extraRows = profileKey === "bac" ? parseBacInstallmentRows(text, directRows) : [];
-      return mergeDuplicateTransactions([...directRows, ...extraRows]);
+    if (state.transactions.length === 0) {
+      setStatus("No pude detectar movimientos automaticamente. Abre 'Ver texto extraido' para ajustar el patron.", "warn");
+    } else {
+      setStatus(`Listo: ${state.transactions.length} movimientos detectados con perfil ${profileLabel(state.activeProfile)}.`, "ok");
     }
 
-    function parseLine(line, profileKey = "ficohsa") {
-      if (profileKey === "ficohsa") {
-        return parseFicohsaLine(line);
+    render();
+  }
+
+  function textItemsToRows(items) {
+    const rows = [];
+
+    const normalizedItems = items
+      .filter((item) => item.str && item.str.trim())
+      .map((item) => ({
+        text: item.str.trim(),
+        x: item.transform[4],
+        y: Math.round(item.transform[5] / 3) * 3
+      }))
+      .sort((a, b) => b.y - a.y || a.x - b.x);
+
+    normalizedItems.forEach((item) => {
+      let row = rows.find((candidate) => Math.abs(candidate.y - item.y) <= 3);
+      if (!row) {
+        row = { y: item.y, parts: [] };
+        rows.push(row);
       }
+      row.parts.push(item);
+    });
 
-      if (profileKey === "bac") {
-        return parseBacLine(line);
-      }
+    return rows
+      .sort((a, b) => b.y - a.y)
+      .map((row) => {
+        const sorted = row.parts.sort((a, b) => a.x - b.x);
+        const line = sorted.map((part) => part.text).join(" ").replace(/\s+/g, " ").trim();
 
-      const profile = profiles[profileKey] || profiles.ficohsa;
-      if (profile.skip?.test(line)) return null;
+        const amountTokens = sorted
+          .map((part) => ({
+            text: part.text,
+            x: part.x,
+            isAmount: /^(?:L\.?|HNL|USD|US\$|\$)?\s*-?(?:\d{1,3}(?:,\d{3})+|\d+)(?:\.\d{2})-?$/.test(part.text)
+          }))
+          .filter((p) => p.isAmount);
 
-      const dateMatch = line.match(/^(\d{1,2}[/-]\d{1,2}(?:[/-]\d{2,4})?|\d{1,2}[-\s]+(?:ENE|FEB|MAR|ABR|MAY|JUN|JUL|AGO|SEP|OCT|NOV|DIC)\.?\s*(?:\d{2,4})?)/i);
-      if (!dateMatch) return null;
+        return JSON.stringify({ line, amountTokens });
+      })
+      .filter(Boolean);
+  }
 
-      const amounts = [...line.matchAll(/(?:L\.?|HNL|USD|\$)?\s*-?(?:\d{1,3}(?:,\d{3})+|\d+)(?:\.\d{2})-?\s*(?:CR|DR|C|D)?/gi)];
-      if (amounts.length === 0) return null;
+  function parseTransactions(text, rawRows = []) {
+    if (state.selectedProfile === "auto") {
+      const attempts = Object.keys(profiles).map((profileKey) => ({
+        profileKey,
+        rows: parseTransactionsWithProfile(text, profileKey, rawRows)
+      }));
+      attempts.sort((a, b) => b.rows.length - a.rows.length);
+      state.activeProfile = attempts[0]?.profileKey || "auto";
+      return attempts[0]?.rows || [];
+    }
 
-      const selectedAmount = selectAmount(amounts, profile.amountMode);
-      const amountText = selectedAmount[0];
-      const amount = parseAmount(amountText);
-      if (!Number.isFinite(amount)) return null;
+    state.activeProfile = state.selectedProfile;
+    return parseTransactionsWithProfile(text, state.selectedProfile, rawRows);
+  }
 
-      const date = dateMatch[1];
-      const description = line
-        .slice(dateMatch[0].length, selectedAmount.index)
-        .replace(/\b(?:compra|consumo|retiro|pago|fecha|descripcion|descripci[oó]n|debito|d[eé]bito|credito|cr[eé]dito|saldo|valor|monto)\b/gi, "")
-        .replace(/\b\d{2}[/-]\d{2}(?:[/-]\d{2,4})?\b/g, "")
-        .replace(/\s+/g, " ")
-        .trim();
+  function parseTransactionsWithProfile(text, profileKey, rawRows = []) {
+    const datePattern = "(?:\\d{1,2}[/-]\\d{1,2}(?:[/-]\\d{2,4})?|\\d{1,2}[-\\s]+(?:ENE|FEB|MAR|ABR|MAY|JUN|JUL|AGO|SEP|OCT|NOV|DIC)\\.?\\s*(?:\\d{2,4})?)";
+    const normalized = text
+      .replace(new RegExp(`\\b(${datePattern})\\b`, "gi"), "\n$1")
+      .replace(/[ \t]{2,}/g, " ");
 
-      if (!description || description.length < 3) return null;
+    const directRows = normalized
+      .split(/\n+/)
+      .map((line) => line.trim())
+      .filter(Boolean)
+      .flatMap((line) => parseLine(line, profileKey, rawRows) || [])
+      .filter(Boolean);
 
-      const typeSource = `${description} ${amountText}`;
-      const looksLikeCredit = isCreditTransaction(typeSource);
-      const currency = detectCurrency(`${line} ${amountText}`);
-      const signedAmount = looksLikeCredit ? -Math.abs(amount) : Math.abs(amount);
-      return {
-        id: crypto.randomUUID(),
-        date,
-        description,
-        category: categorize(description),
-        amount: Math.abs(amount),
-        signedAmount,
-        currency,
-        type: looksLikeCredit ? "Credito" : "Gasto",
+    const extraRows = profileKey === "bac" ? parseBacInstallmentRows(text, directRows) : [];
+    return mergeDuplicateTransactions([...directRows, ...extraRows]);
+  }
+
+  function parseLine(line, profileKey = "ficohsa", rawRows = []) {
+    if (profileKey === "ficohsa") return parseFicohsaLine(line, rawRows);
+    if (profileKey === "bac") return parseBacLine(line);
+
+    const profile = profiles[profileKey] || profiles.ficohsa;
+    if (profile.skip?.test(line)) return null;
+
+    const dateMatch = line.match(/^(\d{1,2}[/-]\d{1,2}(?:[/-]\d{2,4})?|\d{1,2}[-\s]+(?:ENE|FEB|MAR|ABR|MAY|JUN|JUL|AGO|SEP|OCT|NOV|DIC)\.?\s*(?:\d{2,4})?)/i);
+    if (!dateMatch) return null;
+
+    const amounts = [...line.matchAll(/(?:L\.?|HNL|USD|\$)?\s*-?(?:\d{1,3}(?:,\d{3})+|\d+)(?:\.\d{2})-?\s*(?:CR|DR|C|D)?/gi)];
+    if (amounts.length === 0) return null;
+
+    const selectedAmount = selectAmount(amounts, profile.amountMode);
+    const amountText = selectedAmount[0];
+    const amount = parseAmount(amountText);
+    if (!Number.isFinite(amount)) return null;
+
+    const date = dateMatch[1];
+    const description = line
+      .slice(dateMatch[0].length, selectedAmount.index)
+      .replace(/\b(?:compra|consumo|retiro|pago|fecha|descripcion|descripci[oó]n|debito|d[eé]bito|credito|cr[eé]dito|saldo|valor|monto)\b/gi, "")
+      .replace(/\b\d{2}[/-]\d{2}(?:[/-]\d{2,4})?\b/g, "")
+      .replace(/\s+/g, " ")
+      .trim();
+
+    if (!description || description.length < 3) return null;
+
+    const typeSource = `${description} ${amountText}`;
+    const looksLikeCredit = isCreditTransaction(typeSource);
+    const currency = detectCurrency(`${line} ${amountText}`);
+    const signedAmount = looksLikeCredit ? -Math.abs(amount) : Math.abs(amount);
+
+    return {
+      id: crypto.randomUUID(),
+      date,
+      description,
+      category: categorize(description),
+      amount: Math.abs(amount),
+      signedAmount,
+      currency,
+      type: looksLikeCredit ? "Credito" : "Gasto",
+      originalLine: line
+    };
+  }
+
+  function parseFicohsaLine(line, rawRows = []) {
+    const trimmed = line.trim();
+    if (!trimmed) return null;
+    if (/^[+\-=]?\s*TOTAL\b|^RESUMEN\b|^INFORMACI[OÓ]N\b|^L[IÍ]NEA\b|^EXTRAFINANCIAMIENTO\b/i.test(trimmed)) return null;
+
+    const balanceMatch = trimmed.match(/^Saldo\s+Anterior\s+(-?(?:\d{1,3}(?:,\d{3})+|\d+)(?:\.\d{2})-?)\s+(-?(?:\d{1,3}(?:,\d{3})+|\d+)(?:\.\d{2})-?)?/i);
+    if (balanceMatch) {
+      const rows = [buildTransaction({
+        date: "Saldo anterior",
+        description: "Saldo anterior Ficohsa",
+        category: "Saldo anterior",
+        rawAmount: balanceMatch[1],
+        currency: "HNL",
+        forceCredit: false,
         originalLine: line
-      };
-    }
+      })];
 
-    function parseFicohsaLine(line) {
-      const trimmed = line.trim();
-      if (!trimmed) return null;
-      if (/^[+\-=]?\s*TOTAL\b|^RESUMEN\b|^INFORMACI[OÓ]N\b|^L[IÍ]NEA\b|^EXTRAFINANCIAMIENTO\b/i.test(trimmed)) return null;
-
-      const balanceMatch = trimmed.match(/^Saldo\s+Anterior\s+(-?(?:\d{1,3}(?:,\d{3})+|\d+)(?:\.\d{2})-?)\s+(-?(?:\d{1,3}(?:,\d{3})+|\d+)(?:\.\d{2})-?)?/i);
-      if (balanceMatch) {
-        const rows = [buildTransaction({
+      if (balanceMatch[2] && parseAmount(balanceMatch[2]) !== 0) {
+        rows.push(buildTransaction({
           date: "Saldo anterior",
-          description: "Saldo anterior Ficohsa",
+          description: "Saldo anterior Ficohsa USD",
           category: "Saldo anterior",
-          rawAmount: balanceMatch[1],
-          currency: "HNL",
+          rawAmount: balanceMatch[2],
+          currency: "USD",
           forceCredit: false,
           originalLine: line
-        })];
-
-        if (balanceMatch[2] && parseAmount(balanceMatch[2]) !== 0) {
-          rows.push(buildTransaction({
-            date: "Saldo anterior",
-            description: "Saldo anterior Ficohsa USD",
-            category: "Saldo anterior",
-            rawAmount: balanceMatch[2],
-            currency: "USD",
-            forceCredit: false,
-            originalLine: line
-          }));
-        }
-
-        return rows;
+        }));
       }
+      return rows;
+    }
 
-      const dateMatch = trimmed.match(/^(\d{1,2}[/-]\d{1,2}(?:[/-]\d{2,4})?)/);
-      if (!dateMatch) return null;
+    const dateMatch = trimmed.match(/^(\d{1,2}[/-]\d{1,2}(?:[/-]\d{2,4})?|\d{1,2}\s+[A-Z]{3}\.?\s+\d{2,4})/i);
+    if (!dateMatch) return null;
 
-      const amountMatches = [...trimmed.matchAll(/(?:L\.?|HNL|USD|US\$|\$)?\s*-?(?:\d{1,3}(?:,\d{3})+|\d+)(?:\.\d{2})-?/gi)];
-      if (amountMatches.length === 0) return null;
+    const amountMatches = [...trimmed.matchAll(/(?:L\.?|HNL|USD|US\$|\$)?\s*-?(?:\d{1,3}(?:,\d{3})+|\d+)(?:\.\d{2})-?/gi)];
+    if (amountMatches.length === 0) return null;
 
-      const selectedAmount = selectFicohsaAmount(trimmed, amountMatches);
-      const rawAmount = selectedAmount[0];
-      const amount = parseAmount(rawAmount);
-      if (!Number.isFinite(amount)) return null;
+    const selectedAmount = amountMatches[amountMatches.length - 1];
+    const rawAmount = selectedAmount[0];
+    const amount = parseAmount(rawAmount);
+    if (!Number.isFinite(amount)) return null;
 
-      const description = trimmed
-        .slice(dateMatch[0].length, selectedAmount.index)
-        .replace(/\b\d{5,}\b/g, "")
-        .replace(/\s+/g, " ")
-        .trim();
+    const description = trimmed
+      .slice(dateMatch[0].length, selectedAmount.index)
+      .replace(/\b\d{5,}\b/g, "")
+      .replace(/\s+/g, " ")
+      .trim();
 
-      if (!description || description.length < 3) return null;
+    if (!description || description.length < 3) return null;
 
-      const currency = detectFicohsaCurrency(trimmed, description, rawAmount, amount);
-      return buildTransaction({
-        date: dateMatch[1],
-        description,
-        category: categorize(description),
-        rawAmount,
-        currency,
-        forceCredit: isCreditTransaction(`${rawAmount} ${description}`),
-        originalLine: line
+    const rowMeta = rawRows.find((r) => (r?.line || "").includes(trimmed.slice(0, 30)));
+    const tokenXs = (rowMeta?.amountTokens || []).map((t) => t.x).sort((a, b) => a - b);
+
+    const hasRightMostAmount = tokenXs.length >= 2 && tokenXs[tokenXs.length - 1] - tokenXs[0] > 120;
+    const currency = hasRightMostAmount
+      ? "USD"
+      : detectFicohsaCurrency(trimmed, description, rawAmount, amount);
+
+    return buildTransaction({
+      date: dateMatch[1],
+      description,
+      category: categorize(description),
+      rawAmount,
+      currency,
+      forceCredit: isCreditTransaction(`${rawAmount} ${description}`),
+      originalLine: line
+    });
+  }
+
+  // ---------- BAC / genéricas (mantenidas) ----------
+  function parseBacLine(line) {
+    if (profiles.bac.skip?.test(line)) return null;
+
+    const installmentMatch = parseBacInstallmentLine(line);
+    if (installmentMatch) return installmentMatch;
+
+    const bacMatch = line.match(/^(\d{1,2})\s+\d{6,}\s+([A-Z]{3})\/(\d{1,2})\s+(.+?)\s+((?:L\.?|HNL|USD|US\$|\$)?\s*-?(?:\d{1,3}(?:,\d{3})+|\d+)(?:\.\d{2})-?)\s*$/i);
+    if (!bacMatch) return parseGenericBacLine(line);
+
+    const [, , monthText, dayText, rawDescription, rawAmount] = bacMatch;
+    const date = formatBacDate(dayText, monthText);
+    const description = cleanDescription(rawDescription);
+    const amount = parseAmount(rawAmount);
+    if (!description || !Number.isFinite(amount)) return null;
+
+    const credit = isCreditTransaction(`${rawAmount} ${description}`);
+    return {
+      id: crypto.randomUUID(),
+      date,
+      description,
+      category: categorize(description),
+      amount: Math.abs(amount),
+      signedAmount: credit ? -Math.abs(amount) : Math.abs(amount),
+      currency: detectCurrency(line),
+      type: credit ? "Credito" : "Gasto",
+      originalLine: line
+    };
+  }
+
+  function parseBacInstallmentLine(line) {
+    const match = line.match(/^(?:(\d{1,2})\s+)?(?:\d{6,}\s+)?([A-Z]{3})\/(\d{1,2})\s+(.+?(?:CUOTA\s*:?\s*\d{1,2}\/\d{1,3}|CREDOMATIC\s+EXTRAF|EXTRAF|EXTRAFINANCIAMIENTO).*?)\s+((?:L\.?|HNL|USD|US\$|\$)?\s*-?(?:\d{1,3}(?:,\d{3})+|\d+)(?:\.\d{2})-?)\s*$/i);
+    if (!match) return null;
+
+    const [, , monthText, dayText, rawDescription, rawAmount] = match;
+    const description = cleanDescription(rawDescription);
+    const amount = parseAmount(rawAmount);
+    if (!description || !Number.isFinite(amount)) return null;
+
+    const credit = isCreditTransaction(`${rawAmount} ${description}`);
+    return {
+      id: crypto.randomUUID(),
+      date: formatBacDate(dayText, monthText),
+      description,
+      category: "Cuotas / financiamiento",
+      amount: Math.abs(amount),
+      signedAmount: credit ? -Math.abs(amount) : Math.abs(amount),
+      currency: detectCurrency(line),
+      type: credit ? "Credito" : "Gasto",
+      originalLine: line
+    };
+  }
+
+  function parseGenericBacLine(line) {
+    const genericMatch = line.match(/^(?:\d{1,2}\s+)?(?:\d{6,}\s+)?([A-Z]{3})\/(\d{1,2})\s+(.+?)\s+((?:L\.?|HNL|USD|US\$|\$)?\s*-?(?:\d{1,3}(?:,\d{3})+|\d+)(?:\.\d{2})-?)\s*$/i);
+    if (!genericMatch) return null;
+
+    const [, monthText, dayText, rawDescription, rawAmount] = genericMatch;
+    const description = cleanDescription(rawDescription);
+    const amount = parseAmount(rawAmount);
+    if (!description || !Number.isFinite(amount)) return null;
+
+    const credit = isCreditTransaction(`${rawAmount} ${description}`);
+    return {
+      id: crypto.randomUUID(),
+      date: formatBacDate(dayText, monthText),
+      description,
+      category: categorize(description),
+      amount: Math.abs(amount),
+      signedAmount: credit ? -Math.abs(amount) : Math.abs(amount),
+      currency: detectCurrency(line),
+      type: credit ? "Credito" : "Gasto",
+      originalLine: line
+    };
+  }
+
+  function parseBacInstallmentRows(text, existingRows) {
+    const existingKeys = new Set(existingRows.map((item) => `${item.description}|${item.amount.toFixed(2)}`));
+    const lines = text.split(/\n+/).map((line) => line.trim()).filter(Boolean);
+
+    return lines
+      .filter((line) => /(?:[A-Z]{3}\/\d{1,2}).*(?:CUOTA\s*:?\s*\d{1,2}\/\d{1,3}|CREDOMATIC\s+EXTRAF|EXTRAF|EXTRAFINANCIAMIENTO)/i.test(line))
+      .filter((line) => !/l[ií]mite|disponible|utilizado|intereses\s+(?:corrientes|por)|monto\s+extrafinanciamiento\s+utilizado|l[ií]mite\s+global/i.test(line))
+      .map((line) => {
+        const transaction = parseBacInstallmentLine(line) || parseGenericBacLine(line);
+        if (!transaction) return null;
+        transaction.category = "Cuotas / financiamiento";
+        const key = `${transaction.description}|${transaction.amount.toFixed(2)}`;
+        if (existingKeys.has(key)) return null;
+        return transaction;
+      })
+      .filter(Boolean);
+  }
+
+  function formatBacDate(dayText, monthText) {
+    const months = { ENE:"01", FEB:"02", MAR:"03", ABR:"04", MAY:"05", JUN:"06", JUL:"07", AGO:"08", SEP:"09", OCT:"10", NOV:"11", DIC:"12" };
+    const day = String(dayText).padStart(2, "0");
+    const month = months[String(monthText).slice(0,3).toUpperCase()] || "01";
+    return `${day}/${month}/${new Date().getFullYear()}`;
+  }
+
+  function cleanDescription(description) {
+    return description.replace(/\bHN\b/gi, "").replace(/\s+/g, " ").trim();
+  }
+
+  function parseAmount(value) {
+    const clean = String(value)
+      .replace(/HNL|USD|US\$|L\.?|\$/gi, "")
+      .replace(/\b(?:CR|DR|C|D)\b/gi, "")
+      .replace(/,/g, "")
+      .replace(/-$/, "")
+      .trim();
+    return Number.parseFloat(clean);
+  }
+
+  function isCreditTransaction(value) {
+    const clean = String(value).trim();
+    return /(?:^|\s)-\d|-$/i.test(clean) ||
+      /(?:^|\s)(?:pago|abono|credito|cr[eé]dito|cr\b|reversion|reversi[oó]n|devolucion|devoluci[oó]n|descuento|bonificaci[oó]n|bono|ajuste\s+a\s+favor|gracias\s+por\s+su\s+pago)(?:\s|$)/i.test(clean);
+  }
+
+  function detectCurrency(value) {
+    return /USD|US\$|DOLAR|D[OÓ]LAR|\$/i.test(String(value)) ? "USD" : "HNL";
+  }
+
+  function detectFicohsaCurrency(line, description, rawAmount, amount) {
+    if (detectCurrency(`${line} ${rawAmount}`) === "USD") return "USD";
+    if (hasFicohsaForeignMarker(description)) return "USD";
+    if (/gracias\s+por\s+su\s+pago/i.test(description) && Math.abs(amount) < 100) return "USD";
+    return "HNL";
+  }
+
+  function hasFicohsaForeignMarker(description) {
+    return /\b(?:WA|FL|CA|TX|NY|NJ|GA|AZ|IL|PA|US|USA)\b|amazon|google|apple|paypal|microsoft|netflix|spotify/i.test(description);
+  }
+
+  function buildTransaction({ date, description, category, rawAmount, currency, forceCredit, originalLine }) {
+    const amount = parseAmount(rawAmount);
+    const credit = forceCredit || isCreditTransaction(`${rawAmount} ${description}`);
+    return {
+      id: crypto.randomUUID(),
+      date,
+      description,
+      category,
+      amount: Math.abs(amount),
+      signedAmount: credit ? -Math.abs(amount) : Math.abs(amount),
+      currency,
+      type: credit ? "Credito" : "Gasto",
+      originalLine
+    };
+  }
+
+  function selectAmount(amounts, mode) {
+    if (amounts.length === 1) return amounts[0];
+    if (mode === "last") return amounts[amounts.length - 1];
+    if (mode === "second") return amounts[1] || amounts[0];
+    return amounts[0];
+  }
+
+  function profileLabel(profileKey) {
+    return profiles[profileKey]?.label || "Auto";
+  }
+
+  function mergeDuplicateTransactions(transactions) {
+    const seen = new Set();
+    return transactions.filter((transaction) => {
+      const key = [
+        String(transaction.date).toUpperCase(),
+        String(transaction.description).toUpperCase(),
+        Number(transaction.amount || 0).toFixed(2),
+        transaction.type
+      ].join("|");
+      if (seen.has(key)) return false;
+      seen.add(key);
+      return true;
+    });
+  }
+
+  function categorize(description) {
+    const found = categoryRules.find(([, pattern]) => pattern.test(description));
+    return found ? found[0] : "Otros";
+  }
+
+  function render() {
+    const rows = getFilteredTransactions();
+    body.innerHTML = "";
+
+    if (rows.length === 0) {
+      body.innerHTML = '<tr><td class="empty" colspan="6">No hay movimientos para mostrar.</td></tr>';
+    } else {
+      rows.forEach((transaction) => {
+        const row = document.createElement("tr");
+        row.innerHTML = `
+          <td>${escapeHtml(transaction.date)}</td>
+          <td>${escapeHtml(transaction.description)}</td>
+          <td>${categorySelect(transaction)}</td>
+          <td class="amount">${formatSignedAmount(transaction)}</td>
+          <td>${transaction.currency}</td>
+          <td>${transaction.type}</td>
+        `;
+        body.appendChild(row);
       });
     }
 
-    function selectFicohsaAmount(line, amountMatches) {
-      if (/cuota\s+de\s+extrafinanciamiento|financiamiento/i.test(line) && amountMatches.length > 1) {
-        return amountMatches[amountMatches.length - 1];
-      }
-
-      return amountMatches[amountMatches.length - 1];
-    }
-
-    function detectFicohsaCurrency(line, description, rawAmount, amount) {
-      if (detectCurrency(`${line} ${rawAmount}`) === "USD") return "USD";
-      if (hasFicohsaForeignMarker(description)) return "USD";
-      if (/gracias\s+por\s+su\s+pago/i.test(description) && Math.abs(amount) < 100) return "USD";
-      return "HNL";
-    }
-
-    function hasFicohsaForeignMarker(description) {
-      return /\b(?:WA|FL|CA|TX|NY|NJ|GA|AZ|IL|PA|US|USA)\b|amazon|google|apple|paypal|microsoft|netflix|spotify/i.test(description);
-    }
-
-    function buildTransaction({ date, description, category, rawAmount, currency, forceCredit, originalLine }) {
-      const amount = parseAmount(rawAmount);
-      const credit = forceCredit || isCreditTransaction(`${rawAmount} ${description}`);
-
-      return {
-        id: crypto.randomUUID(),
-        date,
-        description,
-        category,
-        amount: Math.abs(amount),
-        signedAmount: credit ? -Math.abs(amount) : Math.abs(amount),
-        currency,
-        type: credit ? "Credito" : "Gasto",
-        originalLine
-      };
-    }
-
-    function parseBacLine(line) {
-      if (profiles.bac.skip?.test(line)) return null;
-
-      const installmentMatch = parseBacInstallmentLine(line);
-      if (installmentMatch) return installmentMatch;
-
-      const bacMatch = line.match(/^(\d{1,2})\s+\d{6,}\s+([A-Z]{3})\/(\d{1,2})\s+(.+?)\s+((?:L\.?|HNL|USD|US\$|\$)?\s*-?(?:\d{1,3}(?:,\d{3})+|\d+)(?:\.\d{2})-?)\s*$/i);
-      if (!bacMatch) return parseGenericBacLine(line);
-
-      const [, , monthText, dayText, rawDescription, rawAmount] = bacMatch;
-      const date = formatBacDate(dayText, monthText);
-      const description = cleanDescription(rawDescription);
-      const amount = parseAmount(rawAmount);
-      if (!description || !Number.isFinite(amount)) return null;
-
-      return {
-        id: crypto.randomUUID(),
-        date,
-        description,
-        category: categorize(description),
-        amount: Math.abs(amount),
-        signedAmount: isCreditTransaction(`${rawAmount} ${description}`) ? -Math.abs(amount) : Math.abs(amount),
-        currency: detectCurrency(line),
-        type: isCreditTransaction(`${rawAmount} ${description}`) ? "Credito" : "Gasto",
-        originalLine: line
-      };
-    }
-
-    function parseBacInstallmentLine(line) {
-      const match = line.match(/^(?:(\d{1,2})\s+)?(?:\d{6,}\s+)?([A-Z]{3})\/(\d{1,2})\s+(.+?(?:CUOTA\s*:?\s*\d{1,2}\/\d{1,3}|CREDOMATIC\s+EXTRAF|EXTRAF|EXTRAFINANCIAMIENTO).*?)\s+((?:L\.?|HNL|USD|US\$|\$)?\s*-?(?:\d{1,3}(?:,\d{3})+|\d+)(?:\.\d{2})-?)(?:\s+.*)?$/i);
-      if (!match) return null;
-
-      const [, , monthText, dayText, rawDescription, rawAmount] = match;
-      const description = cleanDescription(rawDescription);
-      const amount = parseAmount(rawAmount);
-      if (!description || !Number.isFinite(amount)) return null;
-
-      const typeSource = `${rawAmount} ${description}`;
-      const credit = isCreditTransaction(typeSource);
-      return {
-        id: crypto.randomUUID(),
-        date: formatBacDate(dayText, monthText),
-        description,
-        category: "Cuotas / financiamiento",
-        amount: Math.abs(amount),
-        signedAmount: credit ? -Math.abs(amount) : Math.abs(amount),
-        currency: detectCurrency(line),
-        type: credit ? "Credito" : "Gasto",
-        originalLine: line
-      };
-    }
-
-    function parseGenericBacLine(line) {
-      const genericMatch = line.match(/^(?:\d{1,2}\s+)?(?:\d{6,}\s+)?([A-Z]{3})\/(\d{1,2})\s+(.+?)\s+((?:L\.?|HNL|USD|US\$|\$)?\s*-?(?:\d{1,3}(?:,\d{3})+|\d+)(?:\.\d{2})-?)\s*$/i);
-      if (!genericMatch) return null;
-
-      const [, monthText, dayText, rawDescription, rawAmount] = genericMatch;
-      const description = cleanDescription(rawDescription);
-      const amount = parseAmount(rawAmount);
-      if (!description || !Number.isFinite(amount)) return null;
-
-      return {
-        id: crypto.randomUUID(),
-        date: formatBacDate(dayText, monthText),
-        description,
-        category: categorize(description),
-        amount: Math.abs(amount),
-        signedAmount: isCreditTransaction(`${rawAmount} ${description}`) ? -Math.abs(amount) : Math.abs(amount),
-        currency: detectCurrency(line),
-        type: isCreditTransaction(`${rawAmount} ${description}`) ? "Credito" : "Gasto",
-        originalLine: line
-      };
-    }
-
-    function parseBacInstallmentRows(text, existingRows) {
-      const existingKeys = new Set(existingRows.map((item) => `${item.description}|${item.amount.toFixed(2)}`));
-      const lines = text
-        .split(/\n+/)
-        .map((line) => line.trim())
-        .filter(Boolean);
-
-      return lines
-        .filter((line) => /(?:[A-Z]{3}\/\d{1,2}).*(?:CUOTA\s*:?\s*\d{1,2}\/\d{1,3}|CREDOMATIC\s+EXTRAF|EXTRAF|EXTRAFINANCIAMIENTO)/i.test(line))
-        .filter((line) => !/l[ií]mite|disponible|utilizado|intereses\s+(?:corrientes|por)|monto\s+extrafinanciamiento\s+utilizado|l[ií]mite\s+global/i.test(line))
-        .map((line) => {
-          const transaction = parseBacInstallmentLine(line) || parseGenericBacLine(line);
-          if (!transaction) return null;
-
-          transaction.category = "Cuotas / financiamiento";
-          const key = `${transaction.description}|${transaction.amount.toFixed(2)}`;
-          if (existingKeys.has(key)) return null;
-          return transaction;
-        })
-        .filter(Boolean);
-    }
-
-    function formatBacDate(dayText, monthText) {
-      const months = {
-        ENE: "01",
-        FEB: "02",
-        MAR: "03",
-        ABR: "04",
-        MAY: "05",
-        JUN: "06",
-        JUL: "07",
-        AGO: "08",
-        SEP: "09",
-        OCT: "10",
-        NOV: "11",
-        DIC: "12"
-      };
-      const day = String(dayText).padStart(2, "0");
-      const month = months[String(monthText).slice(0, 3).toUpperCase()] || "01";
-      return `${day}/${month}/${new Date().getFullYear()}`;
-    }
-
-    function cleanDescription(description) {
-      return description
-        .replace(/\bHN\b/gi, "")
-        .replace(/\s+/g, " ")
-        .trim();
-    }
-
-    function parseAmount(value) {
-      const clean = value
-        .replace(/HNL|USD|US\$|L\.?|\$/gi, "")
-        .replace(/\b(?:CR|DR|C|D)\b/gi, "")
-        .replace(/,/g, "")
-        .replace(/-$/, "")
-        .trim();
-      return Number.parseFloat(clean);
-    }
-
-    function isCreditTransaction(value) {
-      const clean = value.trim();
-      return /(?:^|\s)-\d|-$/i.test(clean) || /(?:^|\s)(?:pago|abono|credito|cr[eé]dito|cr\b|reversion|reversi[oó]n|devolucion|devoluci[oó]n|descuento|bonificaci[oó]n|bono|ajuste\s+a\s+favor)(?:\s|$)/i.test(clean);
-    }
-
-    function detectCurrency(value) {
-      return /USD|US\$|DOLAR|D[OÓ]LAR|\$/i.test(value) ? "USD" : "HNL";
-    }
-
-    function selectAmount(amounts, mode) {
-      if (amounts.length === 1) return amounts[0];
-      if (mode === "last") return amounts[amounts.length - 1];
-      if (mode === "second") return amounts[1] || amounts[0];
-      return amounts[0];
-    }
-
-    function profileLabel(profileKey) {
-      return profiles[profileKey]?.label || "Auto";
-    }
-
-    function mergeDuplicateTransactions(transactions) {
-      const seen = new Set();
-      return transactions.filter((transaction) => {
-        const key = [
-          transaction.date.toUpperCase(),
-          transaction.description.toUpperCase(),
-          transaction.amount.toFixed(2),
-          transaction.type
-        ].join("|");
-
-        if (seen.has(key)) return false;
-        seen.add(key);
-        return true;
+    body.querySelectorAll("select[data-id]").forEach((select) => {
+      select.addEventListener("change", () => {
+        const transaction = state.transactions.find((item) => item.id === select.dataset.id);
+        if (!transaction) return;
+        transaction.category = select.value;
+        render();
       });
-    }
+    });
 
-    function categorize(description) {
-      const found = categoryRules.find(([, pattern]) => pattern.test(description));
-      return found ? found[0] : "Otros";
-    }
+    updateMetrics(rows);
+  }
 
-    function render() {
-      const rows = getFilteredTransactions();
+  function getFilteredTransactions() {
+    const search = searchInput.value.trim().toLowerCase();
+    const category = categoryFilter.value;
+    const currency = currencyFilter.value;
 
-      body.innerHTML = "";
+    return state.transactions.filter((transaction) => {
+      const matchesSearch = !search || transaction.description.toLowerCase().includes(search);
+      const matchesCategory = !category || transaction.category === category;
+      const matchesCurrency = !currency || transaction.currency === currency;
+      return matchesSearch && matchesCategory && matchesCurrency;
+    });
+  }
 
-      if (rows.length === 0) {
-        body.innerHTML = '<tr><td class="empty" colspan="6">No hay movimientos para mostrar.</td></tr>';
-      } else {
-        rows.forEach((transaction) => {
-          const row = document.createElement("tr");
-          row.innerHTML = `
-            <td>${escapeHtml(transaction.date)}</td>
-            <td>${escapeHtml(transaction.description)}</td>
-            <td>${categorySelect(transaction)}</td>
-            <td class="amount">${formatSignedAmount(transaction)}</td>
-            <td>${transaction.currency}</td>
-            <td>${transaction.type}</td>
-          `;
-          body.appendChild(row);
-        });
-      }
+  function categorySelect(transaction) {
+    const options = categories.map((category) => {
+      const selected = category === transaction.category ? "selected" : "";
+      return `<option value="${escapeHtml(category)}" ${selected}>${escapeHtml(category)}</option>`;
+    }).join("");
+    return `<select class="category" data-id="${transaction.id}">${options}</select>`;
+  }
 
-      body.querySelectorAll("select[data-id]").forEach((select) => {
-        select.addEventListener("change", () => {
-          const transaction = state.transactions.find((item) => item.id === select.dataset.id);
-          transaction.category = select.value;
-          render();
-        });
+  function updateMetrics(filteredRows = getFilteredTransactions()) {
+    const all = state.transactions;
+    const hnlRows = all.filter((item) => item.currency === "HNL");
+    const filteredHnlRows = filteredRows.filter((item) => item.currency === "HNL");
+    const filteredUsdRows = filteredRows.filter((item) => item.currency === "USD");
+    const categoryTotals = new Map();
+
+    const hnlDebits = hnlRows.filter(
+      (item) =>
+        item.signedAmount > 0 &&
+        item.category !== "Saldo anterior" &&
+        !/saldo anterior/i.test(item.description)
+    );
+
+    const hnlCredits = hnlRows.filter((item) => item.signedAmount < 0);
+
+    const sourceForTop = filteredRows.length ? filteredRows : all;
+    sourceForTop
+      .filter((item) => item.signedAmount > 0 && item.category !== "Saldo anterior")
+      .forEach((item) => {
+        categoryTotals.set(item.category, (categoryTotals.get(item.category) || 0) + item.signedAmount);
       });
 
-      updateMetrics(rows);
+    const topCategory = [...categoryTotals.entries()].sort((a, b) => b[1] - a[1])[0];
+
+    document.querySelector("#countMetric").textContent = all.length;
+    document.querySelector("#debitMetric").textContent = `L ${formatMoney(sumSigned(hnlDebits))}`;
+    document.querySelector("#creditMetric").textContent = `L ${formatMoney(sumSigned(hnlCredits))}`;
+    document.querySelector("#topCategoryMetric").textContent = topCategory ? topCategory[0] : "-";
+    document.querySelector("#filteredMetric").textContent = `L ${formatMoney(sumSigned(filteredHnlRows))}`;
+    document.querySelector("#filteredUsdMetric").textContent = `${filteredUsdRows.length} mov. / $ ${formatMoney(sumSigned(filteredUsdRows))}`;
+  }
+
+  function exportRows(rows, filename) {
+    if (rows.length === 0) {
+      setStatus("No hay movimientos filtrados para exportar.", "warn");
+      return;
     }
 
-    function getFilteredTransactions() {
-      const search = searchInput.value.trim().toLowerCase();
-      const category = categoryFilter.value;
-      const currency = currencyFilter.value;
+    const header = ["Fecha", "Descripcion", "Categoria", "Monto", "Moneda", "Tipo"];
+    const lines = rows.map((item) => [
+      item.date,
+      item.description,
+      item.category,
+      item.signedAmount.toFixed(2),
+      item.currency,
+      item.type
+    ]);
 
-      return state.transactions.filter((transaction) => {
-        const matchesSearch = !search || transaction.description.toLowerCase().includes(search);
-        const matchesCategory = !category || transaction.category === category;
-        const matchesCurrency = !currency || transaction.currency === currency;
-        return matchesSearch && matchesCategory && matchesCurrency;
-      });
+    const csv = [header, ...lines]
+      .map((row) => row.map(csvCell).join(","))
+      .join("\n");
+
+    const blob = new Blob([csv], { type: "text/csv;charset=utf-8" });
+    const link = document.createElement("a");
+    link.href = URL.createObjectURL(blob);
+    link.download = filename;
+    link.click();
+    URL.revokeObjectURL(link.href);
+    setStatus(`Exportados ${rows.length} movimientos filtrados.`, "ok");
+  }
+
+  function exportFilteredPdf(rows) {
+    if (rows.length === 0) {
+      setStatus("No hay movimientos filtrados para exportar en PDF.", "warn");
+      return;
     }
 
-    function categorySelect(transaction) {
-      const options = categories.map((category) => {
-        const selected = category === transaction.category ? "selected" : "";
-        return `<option value="${escapeHtml(category)}" ${selected}>${escapeHtml(category)}</option>`;
-      }).join("");
-
-      return `<select class="category" data-id="${transaction.id}">${options}</select>`;
+    if (!window.jspdf?.jsPDF) {
+      setStatus("No pude cargar el generador de PDF. Revisa tu conexion a internet y recarga la pagina.", "warn");
+      return;
     }
 
-    function updateMetrics(filteredRows = getFilteredTransactions()) {
-      const hnlRows = state.transactions.filter((item) => item.currency === "HNL");
-      const hnlDebits = hnlRows.filter((item) => item.signedAmount > 0 && item.category !== "Saldo anterior");
-      const hnlCredits = hnlRows.filter((item) => item.signedAmount < 0);
-      const filteredHnlRows = filteredRows.filter((item) => item.currency === "HNL");
-      const filteredUsdRows = filteredRows.filter((item) => item.currency === "USD");
-      const categoryTotals = new Map();
+    const { jsPDF } = window.jspdf;
+    const doc = new jsPDF({ unit: "pt", format: "letter" });
+    const margin = 36;
+    const category = categoryFilter.value || "Todas";
+    const currency = currencyFilter.value || "Todas";
+    const search = searchInput.value.trim() || "Sin busqueda";
+    const totalHnl = sumSigned(rows.filter((item) => item.currency === "HNL"));
+    const totalUsd = sumSigned(rows.filter((item) => item.currency === "USD"));
+    let y = 42;
 
-      state.transactions
-        .filter((item) => item.signedAmount > 0 && item.category !== "Saldo anterior")
-        .forEach((item) => {
-          categoryTotals.set(item.category, (categoryTotals.get(item.category) || 0) + item.signedAmount);
-        });
+    doc.setFont("helvetica", "bold");
+    doc.setFontSize(16);
+    doc.text("Movimientos filtrados - Ficohsa", margin, y);
 
-      const topCategory = [...categoryTotals.entries()].sort((a, b) => b[1] - a[1])[0];
+    y += 22;
+    doc.setFont("helvetica", "normal");
+    doc.setFontSize(10);
+    doc.text(`Categoria: ${category}`, margin, y); y += 14;
+    doc.text(`Moneda: ${currency}`, margin, y); y += 14;
+    doc.text(`Busqueda: ${search}`, margin, y); y += 14;
+    doc.text(`Movimientos: ${rows.length}`, margin, y); y += 14;
+    doc.text(`Saldo filtrado L: L ${formatMoney(totalHnl)}`, margin, y); y += 14;
+    doc.text(`USD aislado: $ ${formatMoney(totalUsd)} (no mezclado con lempiras)`, margin, y);
 
-      document.querySelector("#countMetric").textContent = state.transactions.length;
-      document.querySelector("#debitMetric").textContent = `L ${formatMoney(sumSigned(hnlDebits))}`;
-      document.querySelector("#creditMetric").textContent = `L ${formatMoney(sumSigned(hnlCredits))}`;
-      document.querySelector("#topCategoryMetric").textContent = topCategory ? topCategory[0] : "-";
-      document.querySelector("#filteredMetric").textContent = `L ${formatMoney(sumSigned(filteredHnlRows))}`;
-      document.querySelector("#filteredUsdMetric").textContent = `${filteredUsdRows.length} mov. / $ ${formatMoney(sumSigned(filteredUsdRows))}`;
-    }
+    y += 24;
+    drawPdfHeader(doc, margin, y);
+    y += 18;
 
-    function exportRows(rows, filename) {
-      if (rows.length === 0) {
-        setStatus("No hay movimientos filtrados para exportar.", "warn");
-        return;
+    rows.forEach((item) => {
+      if (y > 730) {
+        doc.addPage();
+        y = 42;
+        drawPdfHeader(doc, margin, y);
+        y += 18;
       }
-
-      const header = ["Fecha", "Descripcion", "Categoria", "Monto", "Moneda", "Tipo"];
-      const lines = rows.map((item) => [
-        item.date,
-        item.description,
-        item.category,
-        item.signedAmount.toFixed(2),
-        item.currency,
-        item.type
-      ]);
-
-      const csv = [header, ...lines]
-        .map((row) => row.map(csvCell).join(","))
-        .join("\n");
-
-      const blob = new Blob([csv], { type: "text/csv;charset=utf-8" });
-      const link = document.createElement("a");
-      link.href = URL.createObjectURL(blob);
-      link.download = filename;
-      link.click();
-      URL.revokeObjectURL(link.href);
-      setStatus(`Exportados ${rows.length} movimientos filtrados.`, "ok");
-    }
-
-    function exportFilteredPdf(rows) {
-      if (rows.length === 0) {
-        setStatus("No hay movimientos filtrados para exportar en PDF.", "warn");
-        return;
-      }
-
-      if (!window.jspdf?.jsPDF) {
-        setStatus("No pude cargar el generador de PDF. Revisa tu conexion a internet y recarga la pagina.", "warn");
-        return;
-      }
-
-      const { jsPDF } = window.jspdf;
-      const doc = new jsPDF({ unit: "pt", format: "letter" });
-      const margin = 36;
-      const pageWidth = doc.internal.pageSize.getWidth();
-      const pageHeight = doc.internal.pageSize.getHeight();
-      const usableWidth = pageWidth - margin * 2;
-      const category = categoryFilter.value || "Todas";
-      const currency = currencyFilter.value || "Todas";
-      const search = searchInput.value.trim() || "Sin busqueda";
-      const totalHnl = sumSigned(rows.filter((item) => item.currency === "HNL"));
-      const totalUsd = sumSigned(rows.filter((item) => item.currency === "USD"));
-      let y = 42;
-
-      doc.setFont("helvetica", "bold");
-      doc.setFontSize(16);
-      doc.text("Movimientos filtrados - Ficohsa", margin, y);
-
-      y += 22;
       doc.setFont("helvetica", "normal");
-      doc.setFontSize(10);
-      doc.text(`Categoria: ${category}`, margin, y);
+      doc.setFontSize(9);
+      doc.text(String(item.date), margin, y);
+      doc.text(String(item.description).slice(0, 44), margin + 80, y);
+      doc.text(String(item.category).slice(0, 20), margin + 285, y);
+      doc.text(formatSignedAmount(item), margin + 430, y, { align: "right" });
+      doc.text(item.currency, margin + 450, y);
+      doc.text(item.type, margin + 500, y);
       y += 14;
-      doc.text(`Moneda: ${currency}`, margin, y);
-      y += 14;
-      doc.text(`Busqueda: ${search}`, margin, y);
-      y += 14;
-      doc.text(`Movimientos: ${rows.length}`, margin, y);
-      y += 14;
-      doc.text(`Saldo filtrado L: L ${formatMoney(totalHnl)}`, margin, y);
-      y += 14;
-      doc.text(`USD aislado: $ ${formatMoney(totalUsd)} (no mezclado con lempiras)`, margin, y);
+    });
 
-      y += 24;
-      drawPdfHeader(doc, margin, y, usableWidth);
-      y += 18;
+    doc.save("movimientos_filtrados_ficohsa.pdf");
+    setStatus(`PDF generado con ${rows.length} movimientos filtrados.`, "ok");
+  }
 
-      rows.forEach((item) => {
-        const descriptionLines = doc.splitTextToSize(item.description, 245);
-        const rowHeight = Math.max(24, descriptionLines.length * 12 + 8);
+  function drawPdfHeader(doc, x, y) {
+    doc.setFont("helvetica", "bold");
+    doc.setFontSize(9);
+    doc.text("Fecha", x, y);
+    doc.text("Descripcion", x + 80, y);
+    doc.text("Categoria", x + 285, y);
+    doc.text("Monto", x + 430, y, { align: "right" });
+    doc.text("Moneda", x + 450, y);
+    doc.text("Tipo", x + 500, y);
+  }
 
-        if (y + rowHeight > pageHeight - margin) {
-          doc.addPage();
-          y = 42;
-          drawPdfHeader(doc, margin, y, usableWidth);
-          y += 18;
-        }
+  function sumSigned(rows) {
+    return rows.reduce((acc, item) => acc + (Number(item.signedAmount) || 0), 0);
+  }
 
-        doc.setFont("helvetica", "normal");
-        doc.setFontSize(9);
-        doc.text(item.date, margin, y + 12);
-        doc.text(descriptionLines, margin + 66, y + 12);
-        doc.text(item.category, margin + 320, y + 12);
-        doc.text(formatSignedAmount(item), margin + 430, y + 12, { align: "right" });
-        doc.text(item.currency, margin + 442, y + 12);
-        doc.text(item.type, margin + 482, y + 12);
+  function formatMoney(value) {
+    return Number(value || 0).toLocaleString("en-US", {
+      minimumFractionDigits: 2,
+      maximumFractionDigits: 2
+    });
+  }
 
-        y += rowHeight;
-        doc.setDrawColor(220, 226, 236);
-        doc.line(margin, y, margin + usableWidth, y);
-      });
+  function formatSignedAmount(item) {
+    const prefix = item.signedAmount < 0 ? "-" : "";
+    const symbol = item.currency === "USD" ? "$" : "L";
+    return `${prefix}${symbol} ${formatMoney(Math.abs(item.signedAmount))}`;
+  }
 
-      const filenameCategory = category.toLowerCase().replace(/[^a-z0-9]+/gi, "_").replace(/^_|_$/g, "") || "todos";
-      doc.save(`movimientos_${filenameCategory}_ficohsa.pdf`);
-      setStatus(`Exportados ${rows.length} movimientos filtrados en PDF.`, "ok");
-    }
+  function csvCell(value) {
+    const text = String(value ?? "");
+    if (/[",\n]/.test(text)) return `"${text.replace(/"/g, '""')}"`;
+    return text;
+  }
 
-    function drawPdfHeader(doc, margin, y, usableWidth) {
-      doc.setFillColor(248, 250, 253);
-      doc.setDrawColor(220, 226, 236);
-      doc.rect(margin, y - 12, usableWidth, 20, "FD");
-      doc.setFont("helvetica", "bold");
-      doc.setFontSize(8);
-      doc.text("FECHA", margin, y);
-      doc.text("DESCRIPCION", margin + 66, y);
-      doc.text("CATEGORIA", margin + 320, y);
-      doc.text("MONTO", margin + 430, y, { align: "right" });
-      doc.text("MONEDA", margin + 442, y);
-      doc.text("TIPO", margin + 482, y);
-    }
+  function escapeHtml(value) {
+    return String(value ?? "")
+      .replace(/&/g, "&amp;")
+      .replace(/</g, "&lt;")
+      .replace(/>/g, "&gt;")
+      .replace(/"/g, "&quot;")
+      .replace(/'/g, "&#039;");
+  }
 
-    function csvCell(value) {
-      return `"${String(value).replace(/"/g, '""')}"`;
-    }
-
-    function sum(items) {
-      return items.reduce((total, item) => total + item.amount, 0);
-    }
-
-    function sumSigned(items) {
-      return items.reduce((total, item) => total + (item.signedAmount || 0), 0);
-    }
-
-    function formatSignedAmount(item) {
-      const symbol = item.currency === "USD" ? "$" : "L";
-      const value = item.signedAmount ?? item.amount;
-      const sign = value < 0 ? "-" : "";
-      return `${sign}${symbol} ${formatMoney(Math.abs(value))}`;
-    }
-
-    function formatMoney(value) {
-      return value.toLocaleString("es-HN", {
-        minimumFractionDigits: 2,
-        maximumFractionDigits: 2
-      });
-    }
-
-    function setStatus(message, tone = "") {
-      status.textContent = message;
-      status.className = `status ${tone}`.trim();
-    }
-
-    function escapeHtml(value) {
-      return String(value)
-        .replace(/&/g, "&amp;")
-        .replace(/</g, "&lt;")
-        .replace(/>/g, "&gt;")
-        .replace(/"/g, "&quot;")
-        .replace(/'/g, "&#039;");
-    }
-  </script>
+  function setStatus(message, level = "") {
+    status.textContent = message;
+    status.className = `status${level ? ` ${level}` : ""}`;
+  }
+</script>
 </body>
 </html>
