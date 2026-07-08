@@ -584,6 +584,8 @@
       currency,
       type: looksLikeCredit ? "Credito" : "Gasto",
       originalLine: line
+      includeInTotals: true,
+manualAmount: null
     };
   }
 
@@ -795,17 +797,19 @@
   function buildTransaction({ date, description, category, rawAmount, currency, forceCredit, originalLine }) {
     const amount = parseAmount(rawAmount);
     const credit = forceCredit || isCreditTransaction(`${rawAmount} ${description}`);
-    return {
-      id: crypto.randomUUID(),
-      date,
-      description,
-      category,
-      amount: Math.abs(amount),
-      signedAmount: credit ? -Math.abs(amount) : Math.abs(amount),
-      currency,
-      type: credit ? "Credito" : "Gasto",
-      originalLine
-    };
+   return {
+  id: crypto.randomUUID(),
+  date,
+  description,
+  category,
+  amount: Math.abs(amount),
+  signedAmount: credit ? -Math.abs(amount) : Math.abs(amount),
+  currency,
+  type: credit ? "Credito" : "Gasto",
+  originalLine,
+  includeInTotals: true,
+  manualAmount: null
+};
   }
 
   function selectAmount(amounts, mode) {
@@ -839,38 +843,81 @@
     return found ? found[0] : "Otros";
   }
 
-  function render() {
-    const rows = getFilteredTransactions();
-    body.innerHTML = "";
+ function render() {
+  const rows = getFilteredTransactions();
+  body.innerHTML = "";
 
-    if (rows.length === 0) {
-      body.innerHTML = '<tr><td class="empty" colspan="6">No hay movimientos para mostrar.</td></tr>';
-    } else {
-      rows.forEach((transaction) => {
-        const row = document.createElement("tr");
-        row.innerHTML = `
-          <td>${escapeHtml(transaction.date)}</td>
-          <td>${escapeHtml(transaction.description)}</td>
-          <td>${categorySelect(transaction)}</td>
-          <td class="amount">${formatSignedAmount(transaction)}</td>
-          <td>${transaction.currency}</td>
-          <td>${transaction.type}</td>
-        `;
-        body.appendChild(row);
-      });
-    }
-
-    body.querySelectorAll("select[data-id]").forEach((select) => {
-      select.addEventListener("change", () => {
-        const transaction = state.transactions.find((item) => item.id === select.dataset.id);
-        if (!transaction) return;
-        transaction.category = select.value;
-        render();
-      });
-    });
-
-    updateMetrics(rows);
+  const tableHeadRow = document.querySelector("thead tr");
+  if (tableHeadRow && !document.querySelector("#thInclude")) {
+    const th = document.createElement("th");
+    th.id = "thInclude";
+    th.textContent = "Incluir";
+    tableHeadRow.appendChild(th);
   }
+
+  if (rows.length === 0) {
+    body.innerHTML = '<tr><td class="empty" colspan="7">No hay movimientos para mostrar.</td></tr>';
+  } else {
+    rows.forEach((transaction) => {
+      const row = document.createElement("tr");
+      row.innerHTML = `
+        <td>${escapeHtml(transaction.date)}</td>
+        <td>${escapeHtml(transaction.description)}</td>
+        <td>${categorySelect(transaction)}</td>
+        <td class="amount">${amountInput(transaction)}</td>
+        <td>${currencySelect(transaction)}</td>
+        <td>${transaction.type}</td>
+        <td>${includeSelect(transaction)}</td>
+      `;
+      body.appendChild(row);
+    });
+  }
+
+  body.querySelectorAll("select[data-id]").forEach((select) => {
+    select.addEventListener("change", () => {
+      const transaction = state.transactions.find((item) => item.id === select.dataset.id);
+      if (!transaction) return;
+      transaction.category = select.value;
+      render();
+    });
+  });
+
+  body.querySelectorAll("select[data-currency-id]").forEach((select) => {
+    select.addEventListener("change", () => {
+      const transaction = state.transactions.find((item) => item.id === select.dataset.currencyId);
+      if (!transaction) return;
+      transaction.currency = select.value;
+      render();
+    });
+  });
+
+  body.querySelectorAll("select[data-include-id]").forEach((select) => {
+    select.addEventListener("change", () => {
+      const transaction = state.transactions.find((item) => item.id === select.dataset.includeId);
+      if (!transaction) return;
+      transaction.includeInTotals = select.value === "yes";
+      render();
+    });
+  });
+
+  body.querySelectorAll("input[data-amount-id]").forEach((input) => {
+    input.addEventListener("change", () => {
+      const transaction = state.transactions.find((item) => item.id === input.dataset.amountId);
+      if (!transaction) return;
+
+      const parsed = Number(input.value);
+      if (!Number.isFinite(parsed)) return;
+
+      transaction.manualAmount = parsed;
+      transaction.signedAmount = parsed;
+      transaction.amount = Math.abs(parsed);
+      transaction.type = parsed < 0 ? "Credito" : "Gasto";
+      render();
+    });
+  });
+
+  updateMetrics(rows);
+}
 
   function getFilteredTransactions() {
     const search = searchInput.value.trim().toLowerCase();
@@ -891,40 +938,65 @@
       return `<option value="${escapeHtml(category)}" ${selected}>${escapeHtml(category)}</option>`;
     }).join("");
     return `<select class="category" data-id="${transaction.id}">${options}</select>`;
-  }
+  } function currencySelect(transaction) {
+  return `
+    <select data-currency-id="${transaction.id}">
+      <option value="HNL" ${transaction.currency === "HNL" ? "selected" : ""}>HNL</option>
+      <option value="USD" ${transaction.currency === "USD" ? "selected" : ""}>USD</option>
+    </select>
+  `;
+}
 
-  function updateMetrics(filteredRows = getFilteredTransactions()) {
-    const all = state.transactions;
-    const hnlRows = all.filter((item) => item.currency === "HNL");
-    const filteredHnlRows = filteredRows.filter((item) => item.currency === "HNL");
-    const filteredUsdRows = filteredRows.filter((item) => item.currency === "USD");
-    const categoryTotals = new Map();
+function includeSelect(transaction) {
+  const include = transaction.includeInTotals !== false;
+  return `
+    <select data-include-id="${transaction.id}">
+      <option value="yes" ${include ? "selected" : ""}>Si</option>
+      <option value="no" ${!include ? "selected" : ""}>No</option>
+    </select>
+  `;
+}
 
-    const hnlDebits = hnlRows.filter(
-      (item) =>
-        item.signedAmount > 0 &&
-        item.category !== "Saldo anterior" &&
-        !/saldo anterior/i.test(item.description)
-    );
+function amountInput(transaction) {
+  const value = Number(transaction.signedAmount || 0).toFixed(2);
+  return `<input data-amount-id="${transaction.id}" type="number" step="0.01" value="${value}" style="width:120px;text-align:right;">`;
+}
 
-    const hnlCredits = hnlRows.filter((item) => item.signedAmount < 0);
+ function updateMetrics(filteredRows = getFilteredTransactions()) {
+  const all = state.transactions;
+  const includedAll = all.filter((item) => item.includeInTotals !== false);
+  const includedFiltered = filteredRows.filter((item) => item.includeInTotals !== false);
 
-    const sourceForTop = filteredRows.length ? filteredRows : all;
-    sourceForTop
-      .filter((item) => item.signedAmount > 0 && item.category !== "Saldo anterior")
-      .forEach((item) => {
-        categoryTotals.set(item.category, (categoryTotals.get(item.category) || 0) + item.signedAmount);
-      });
+  const hnlRows = includedAll.filter((item) => item.currency === "HNL");
+  const filteredHnlRows = includedFiltered.filter((item) => item.currency === "HNL");
+  const filteredUsdRows = includedFiltered.filter((item) => item.currency === "USD");
 
-    const topCategory = [...categoryTotals.entries()].sort((a, b) => b[1] - a[1])[0];
+  const hnlDebits = hnlRows.filter(
+    (item) =>
+      item.signedAmount > 0 &&
+      item.category !== "Saldo anterior" &&
+      !/saldo anterior/i.test(item.description)
+  );
 
-    document.querySelector("#countMetric").textContent = all.length;
-    document.querySelector("#debitMetric").textContent = `L ${formatMoney(sumSigned(hnlDebits))}`;
-    document.querySelector("#creditMetric").textContent = `L ${formatMoney(sumSigned(hnlCredits))}`;
-    document.querySelector("#topCategoryMetric").textContent = topCategory ? topCategory[0] : "-";
-    document.querySelector("#filteredMetric").textContent = `L ${formatMoney(sumSigned(filteredHnlRows))}`;
-    document.querySelector("#filteredUsdMetric").textContent = `${filteredUsdRows.length} mov. / $ ${formatMoney(sumSigned(filteredUsdRows))}`;
-  }
+  const hnlCredits = hnlRows.filter((item) => item.signedAmount < 0);
+
+  const categoryTotals = new Map();
+  const sourceForTop = includedFiltered.length ? includedFiltered : includedAll;
+  sourceForTop
+    .filter((item) => item.signedAmount > 0 && item.category !== "Saldo anterior")
+    .forEach((item) => {
+      categoryTotals.set(item.category, (categoryTotals.get(item.category) || 0) + item.signedAmount);
+    });
+
+  const topCategory = [...categoryTotals.entries()].sort((a, b) => b[1] - a[1])[0];
+
+  document.querySelector("#countMetric").textContent = includedAll.length;
+  document.querySelector("#debitMetric").textContent = `L ${formatMoney(sumSigned(hnlDebits))}`;
+  document.querySelector("#creditMetric").textContent = `L ${formatMoney(sumSigned(hnlCredits))}`;
+  document.querySelector("#topCategoryMetric").textContent = topCategory ? topCategory[0] : "-";
+  document.querySelector("#filteredMetric").textContent = `L ${formatMoney(sumSigned(filteredHnlRows))}`;
+  document.querySelector("#filteredUsdMetric").textContent = `${filteredUsdRows.length} mov. / $ ${formatMoney(sumSigned(filteredUsdRows))}`;
+}
 
   function exportRows(rows, filename) {
     if (rows.length === 0) {
