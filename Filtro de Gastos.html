@@ -18,7 +18,21 @@
       --good: #16784b;
       --warn: #9a5a00;
     }
+.metric {
+  min-width: 0;
+}
 
+.metric .value,
+#filteredUsdMetric {
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+/* Opcional: darle más espacio al card de USD */
+.metric.usd-wide {
+  min-width: 210px;
+}
     * {
       box-sizing: border-box;
     }
