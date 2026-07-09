@@ -98,9 +98,10 @@
     .toolbar {
       padding: 16px;
       display: grid;
-      grid-template-columns: 170px minmax(0, 1fr) auto auto auto auto;
+      grid-template-columns: 170px minmax(0, 1fr) auto auto auto auto auto auto;
       gap: 12px;
       align-items: center;
+      flex-wrap: wrap;
     }
 
     input[type="file"] {
@@ -123,6 +124,7 @@
       color: white;
       font-weight: 700;
       cursor: pointer;
+      white-space: nowrap;
     }
 
     button:hover {
@@ -297,6 +299,8 @@
       <button id="exportButton" class="secondary">Exportar CSV</button>
       <button id="sheetsButton" class="secondary">Google Sheets</button>
       <button id="pdfButton" class="secondary">Exportar PDF</button>
+      <button id="saveButton" class="secondary">💾 Guardar cambios</button>
+      <button id="loadButton" class="secondary">📂 Cargar cambios</button>
     </section>
 
     <section class="summary" aria-label="Resumen">
@@ -392,12 +396,16 @@
     activeProfile: "auto"
   };
 
+  const STORAGE_KEY = "fastcalc_manual_edits_v1";
+
   const fileInput = document.querySelector("#pdfFile");
   const bankSelect = document.querySelector("#bankSelect");
   const readButton = document.querySelector("#readButton");
   const exportButton = document.querySelector("#exportButton");
   const sheetsButton = document.querySelector("#sheetsButton");
   const pdfButton = document.querySelector("#pdfButton");
+  const saveButton = document.querySelector("#saveButton");
+  const loadButton = document.querySelector("#loadButton");
   const searchInput = document.querySelector("#searchInput");
   const categoryFilter = document.querySelector("#categoryFilter");
   const currencyFilter = document.querySelector("#currencyFilter");
@@ -423,6 +431,8 @@
   exportButton.addEventListener("click", () => exportRows(getFilteredTransactions(), "movimientos_filtrados_ficohsa.csv"));
   sheetsButton.addEventListener("click", () => exportRows(getFilteredTransactions(), "movimientos_filtrados_google_sheets.csv"));
   pdfButton.addEventListener("click", () => exportFilteredPdf(getFilteredTransactions()));
+  saveButton.addEventListener("click", saveEdits);
+  loadButton.addEventListener("click", loadEdits);
   searchInput.addEventListener("input", render);
   categoryFilter.addEventListener("change", render);
   currencyFilter.addEventListener("change", render);
@@ -465,6 +475,9 @@
     }
 
     render();
+    
+    // Auto-cargar cambios guardados después de leer PDF
+    loadEdits();
   }
 
   function textItemsToRows(items) {
@@ -714,6 +727,82 @@
   function categorize(description) {
     const found = categoryRules.find(([, pattern]) => pattern.test(description));
     return found ? found[0] : "Pets";
+  }
+
+  function buildStableKey(tx) {
+    return [
+      String(tx.date || "").trim().toUpperCase(),
+      String(tx.description || "").trim().toUpperCase(),
+      Number(tx.amount || 0).toFixed(2),
+      String(tx.currency || "").trim().toUpperCase()
+    ].join("|");
+  }
+
+  function saveEdits() {
+    if (!state.transactions.length) {
+      setStatus("No hay movimientos para guardar.", "warn");
+      return;
+    }
+
+    const payload = {
+      savedAt: new Date().toISOString(),
+      edits: state.transactions.map((tx) => ({
+        key: buildStableKey(tx),
+        category: tx.category,
+        currency: tx.currency,
+        includeInTotals: tx.includeInTotals !== false,
+        signedAmount: Number(tx.signedAmount || 0),
+        manualAmount: tx.manualAmount
+      }))
+    };
+
+    localStorage.setItem(STORAGE_KEY, JSON.stringify(payload));
+    setStatus(`✅ Cambios guardados (${payload.edits.length} movimientos).`, "ok");
+  }
+
+  function loadEdits() {
+    const raw = localStorage.getItem(STORAGE_KEY);
+    if (!raw) {
+      setStatus("No hay guardado previo en este navegador.", "warn");
+      return;
+    }
+
+    if (!state.transactions.length) {
+      setStatus("Primero lee un PDF para aplicar los cambios guardados.", "warn");
+      return;
+    }
+
+    let payload;
+    try {
+      payload = JSON.parse(raw);
+    } catch {
+      setStatus("El guardado esta corrupto.", "warn");
+      return;
+    }
+
+    const map = new Map((payload.edits || []).map((e) => [e.key, e]));
+    let applied = 0;
+
+    state.transactions.forEach((tx) => {
+      const edit = map.get(buildStableKey(tx));
+      if (!edit) return;
+
+      tx.category = edit.category ?? tx.category;
+      tx.currency = edit.currency ?? tx.currency;
+      tx.includeInTotals = edit.includeInTotals !== false;
+
+      if (Number.isFinite(Number(edit.signedAmount))) {
+        tx.signedAmount = Number(edit.signedAmount);
+        tx.amount = Math.abs(tx.signedAmount);
+        tx.type = tx.signedAmount < 0 ? "Credito" : "Gasto";
+      }
+
+      tx.manualAmount = edit.manualAmount ?? tx.manualAmount;
+      applied += 1;
+    });
+
+    render();
+    setStatus(`✅ Cambios recuperados: ${applied} movimiento(s) restaurados.`, applied ? "ok" : "warn");
   }
 
   function render() {
