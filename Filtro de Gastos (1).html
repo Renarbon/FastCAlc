@@ -357,7 +357,7 @@
 
   const categories = [
     "Saldo anterior","Supermercado","Comer fuera","Cuotas / financiamiento","Appliances",
-    "Gasolina","Servicios","Salud","Transporte","Compras","Entretenimiento","Banco / cargos","Otros"
+    "Gasolina","Servicios","Salud","Transporte","Compras","Entretenimiento","Banco / cargos","Pets"
   ];
 
   const categoryRules = [
@@ -713,7 +713,7 @@
 
   function categorize(description) {
     const found = categoryRules.find(([, pattern]) => pattern.test(description));
-    return found ? found[0] : "Otros";
+    return found ? found[0] : "Pets";
   }
 
   function render() {
