@@ -4,14 +4,198 @@
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <title>FastCAlc</title>
-  <meta http-equiv="refresh" content="0; url=Filtro%20de%20Gastos%20(1).html">
+  <meta name="description" content="Acceso al filtro de gastos de FastCAlc.">
   <style>
-    body { font-family: Arial, Helvetica, sans-serif; padding: 40px; background: #f5f7fb; color: #1d2433; }
-    a { color: #0b62b4; }
+    :root {
+      color-scheme: light;
+      --bg: linear-gradient(135deg, #eaf2ff 0%, #f7f9fc 45%, #eef4ff 100%);
+      --card: rgba(255, 255, 255, 0.82);
+      --card-border: rgba(11, 98, 180, 0.12);
+      --text: #162033;
+      --muted: #5f6b7f;
+      --brand: #0b62b4;
+      --brand-dark: #084b89;
+      --shadow: 0 18px 50px rgba(13, 42, 78, 0.14);
+    }
+
+    * { box-sizing: border-box; }
+
+    body {
+      margin: 0;
+      min-height: 100vh;
+      font-family: Arial, Helvetica, sans-serif;
+      background: var(--bg);
+      color: var(--text);
+      display: grid;
+      place-items: center;
+      padding: 24px;
+    }
+
+    .shell {
+      width: min(920px, 100%);
+      display: grid;
+      grid-template-columns: 1.2fr 0.8fr;
+      gap: 20px;
+      align-items: stretch;
+    }
+
+    .hero,
+    .side {
+      background: var(--card);
+      border: 1px solid var(--card-border);
+      border-radius: 24px;
+      box-shadow: var(--shadow);
+      backdrop-filter: blur(10px);
+    }
+
+    .hero {
+      padding: 34px;
+    }
+
+    .badge {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      padding: 8px 12px;
+      border-radius: 999px;
+      background: rgba(11, 98, 180, 0.10);
+      color: var(--brand);
+      font-weight: 700;
+      font-size: 13px;
+      margin-bottom: 18px;
+    }
+
+    h1 {
+      margin: 0 0 12px;
+      font-size: clamp(30px, 4vw, 48px);
+      line-height: 1.05;
+    }
+
+    p {
+      margin: 0;
+      color: var(--muted);
+      line-height: 1.6;
+      font-size: 16px;
+    }
+
+    .actions {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 12px;
+      margin-top: 28px;
+    }
+
+    .btn {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      gap: 10px;
+      padding: 14px 18px;
+      border-radius: 14px;
+      text-decoration: none;
+      font-weight: 700;
+      transition: transform 0.15s ease, background 0.15s ease, box-shadow 0.15s ease;
+    }
+
+    .btn.primary {
+      background: linear-gradient(135deg, var(--brand), #1976d2);
+      color: white;
+      box-shadow: 0 10px 24px rgba(11, 98, 180, 0.28);
+    }
+
+    .btn.primary:hover { background: linear-gradient(135deg, var(--brand-dark), #125ea8); transform: translateY(-1px); }
+
+    .btn.secondary {
+      background: rgba(255,255,255,0.9);
+      color: var(--brand);
+      border: 1px solid rgba(11, 98, 180, 0.18);
+    }
+
+    .btn.secondary:hover { transform: translateY(-1px); }
+
+    .side {
+      padding: 24px;
+      display: grid;
+      gap: 16px;
+      align-content: center;
+    }
+
+    .card {
+      padding: 16px;
+      border-radius: 18px;
+      background: rgba(248, 251, 255, 0.95);
+      border: 1px solid rgba(214, 224, 240, 0.9);
+    }
+
+    .card h2 {
+      margin: 0 0 6px;
+      font-size: 15px;
+    }
+
+    .card span {
+      color: var(--muted);
+      font-size: 14px;
+      line-height: 1.5;
+    }
+
+    .url {
+      word-break: break-all;
+      font-size: 13px;
+      color: #30557f;
+      background: rgba(11, 98, 180, 0.06);
+      padding: 10px 12px;
+      border-radius: 12px;
+      border: 1px solid rgba(11, 98, 180, 0.12);
+    }
+
+    .footer {
+      margin-top: 8px;
+      font-size: 13px;
+      color: var(--muted);
+    }
+
+    @media (max-width: 760px) {
+      .shell { grid-template-columns: 1fr; }
+      .hero, .side { padding: 22px; border-radius: 20px; }
+      .actions { flex-direction: column; }
+      .btn { width: 100%; }
+    }
   </style>
 </head>
 <body>
-  <h1>FastCAlc</h1>
-  <p>Abriendo <a href="Filtro%20de%20Gastos%20(1).html">Filtro de Gastos</a>...</p>
+  <div class="shell">
+    <section class="hero">
+      <div class="badge">FastCAlc · Filtro de gastos</div>
+      <h1>Abre tu lector de estados de cuenta en un clic</h1>
+      <p>
+        Sube un PDF, revisa los movimientos detectados y exporta tus gastos a CSV o PDF.
+        Esta página es la entrada principal al proyecto.
+      </p>
+
+      <div class="actions">
+        <a class="btn primary" href="Filtro%20de%20Gastos%20(1).html">Abrir Filtro de Gastos</a>
+        <a class="btn secondary" href="https://github.com/Renarbon/FastCAlc/blob/main/Filtro%20de%20Gastos%20(1).html" target="_blank" rel="noreferrer">Ver archivo en GitHub</a>
+      </div>
+
+      <div class="footer">Recomendado: usa el botón principal para entrar directamente a la herramienta.</div>
+    </section>
+
+    <aside class="side">
+      <div class="card">
+        <h2>Qué hace</h2>
+        <span>Detecta movimientos de estados de cuenta, los clasifica y te deja filtrarlos antes de exportar.</span>
+      </div>
+
+      <div class="card">
+        <h2>Archivo principal</h2>
+        <div class="url">Filtro de Gastos (1).html</div>
+      </div>
+
+      <div class="card">
+        <h2>Repositorio</h2>
+        <span>Renarbon / FastCAlc</span>
+      </div>
+    </aside>
+  </div>
 </body>
 </html>
