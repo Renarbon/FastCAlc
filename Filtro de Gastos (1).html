@@ -396,8 +396,6 @@
     activeProfile: "auto"
   };
 
-  const STORAGE_KEY = "fastcalc_manual_edits_v1";
-
   const fileInput = document.querySelector("#pdfFile");
   const bankSelect = document.querySelector("#bankSelect");
   const readButton = document.querySelector("#readButton");
@@ -475,9 +473,6 @@
     }
 
     render();
-    
-    // Auto-cargar cambios guardados después de leer PDF
-    loadEdits();
   }
 
   function textItemsToRows(items) {
@@ -744,8 +739,13 @@
       return;
     }
 
+    const bankLabel = profileLabel(state.activeProfile).toLowerCase().replace(/\s+/g, "_");
+    const dateStr = new Date().toISOString().slice(0, 10);
+    const filename = `edits_${bankLabel}_${dateStr}.json`;
+
     const payload = {
       savedAt: new Date().toISOString(),
+      bank: state.activeProfile,
       edits: state.transactions.map((tx) => ({
         key: buildStableKey(tx),
         category: tx.category,
@@ -756,53 +756,62 @@
       }))
     };
 
-    localStorage.setItem(STORAGE_KEY, JSON.stringify(payload));
-    setStatus(`✅ Cambios guardados (${payload.edits.length} movimientos).`, "ok");
+    const blob = new Blob([JSON.stringify(payload, null, 2)], { type: "application/json" });
+    const link = document.createElement("a");
+    link.href = URL.createObjectURL(blob);
+    link.download = filename;
+    link.click();
+    URL.revokeObjectURL(link.href);
+    setStatus(`✅ Cambios guardados como "${filename}" (${payload.edits.length} movimientos).`, "ok");
   }
 
   function loadEdits() {
-    const raw = localStorage.getItem(STORAGE_KEY);
-    if (!raw) {
-      setStatus("No hay guardado previo en este navegador.", "warn");
-      return;
-    }
+    const input = document.createElement("input");
+    input.type = "file";
+    input.accept = "application/json,.json";
+    input.addEventListener("change", async () => {
+      const file = input.files[0];
+      if (!file) return;
 
-    if (!state.transactions.length) {
-      setStatus("Primero lee un PDF para aplicar los cambios guardados.", "warn");
-      return;
-    }
-
-    let payload;
-    try {
-      payload = JSON.parse(raw);
-    } catch {
-      setStatus("El guardado esta corrupto.", "warn");
-      return;
-    }
-
-    const map = new Map((payload.edits || []).map((e) => [e.key, e]));
-    let applied = 0;
-
-    state.transactions.forEach((tx) => {
-      const edit = map.get(buildStableKey(tx));
-      if (!edit) return;
-
-      tx.category = edit.category ?? tx.category;
-      tx.currency = edit.currency ?? tx.currency;
-      tx.includeInTotals = edit.includeInTotals !== false;
-
-      if (Number.isFinite(Number(edit.signedAmount))) {
-        tx.signedAmount = Number(edit.signedAmount);
-        tx.amount = Math.abs(tx.signedAmount);
-        tx.type = tx.signedAmount < 0 ? "Credito" : "Gasto";
+      let payload;
+      try {
+        const text = await file.text();
+        payload = JSON.parse(text);
+      } catch {
+        setStatus("El archivo seleccionado no es un JSON válido.", "warn");
+        return;
       }
 
-      tx.manualAmount = edit.manualAmount ?? tx.manualAmount;
-      applied += 1;
-    });
+      if (!state.transactions.length) {
+        setStatus("Primero lee un PDF para aplicar los cambios guardados.", "warn");
+        return;
+      }
 
-    render();
-    setStatus(`✅ Cambios recuperados: ${applied} movimiento(s) restaurados.`, applied ? "ok" : "warn");
+      const map = new Map((payload.edits || []).map((e) => [e.key, e]));
+      let applied = 0;
+
+      state.transactions.forEach((tx) => {
+        const edit = map.get(buildStableKey(tx));
+        if (!edit) return;
+
+        tx.category = edit.category ?? tx.category;
+        tx.currency = edit.currency ?? tx.currency;
+        tx.includeInTotals = edit.includeInTotals !== false;
+
+        if (Number.isFinite(Number(edit.signedAmount))) {
+          tx.signedAmount = Number(edit.signedAmount);
+          tx.amount = Math.abs(tx.signedAmount);
+          tx.type = tx.signedAmount < 0 ? "Credito" : "Gasto";
+        }
+
+        tx.manualAmount = edit.manualAmount ?? tx.manualAmount;
+        applied += 1;
+      });
+
+      render();
+      setStatus(`✅ Cambios recuperados desde "${file.name}": ${applied} movimiento(s) restaurados.`, applied ? "ok" : "warn");
+    });
+    input.click();
   }
 
   function render() {
