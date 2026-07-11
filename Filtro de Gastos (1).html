@@ -21,91 +21,56 @@
 .metric {
   min-width: 0;
 }
-
 .metric .value,
 #filteredUsdMetric {
   white-space: nowrap;
   overflow: hidden;
   text-overflow: ellipsis;
 }
-
-/* Opcional: darle más espacio al card de USD */
-.metric {
-  min-width: 0;
-}
-
-.metric .value,
-#filteredUsdMetric {
-  white-space: nowrap;
-  overflow: hidden;
-  text-overflow: ellipsis;
-}
-
-/* Más espacio al card de USD */
 .metric.usd-wide {
   min-width: 240px;
 }
-
 .metric.usd-wide strong {
   white-space: nowrap;
   overflow: visible;
   text-overflow: clip;
 }
-    * {
-      box-sizing: border-box;
-    }
-
+    * { box-sizing: border-box; }
     body {
       margin: 0;
       font-family: Arial, Helvetica, sans-serif;
       background: var(--bg);
       color: var(--text);
     }
-
     header {
       padding: 22px 28px;
       background: var(--panel);
       border-bottom: 1px solid var(--line);
     }
-
-    h1 {
-      margin: 0 0 6px;
-      font-size: 24px;
-      letter-spacing: 0;
-    }
-
-    header p {
-      margin: 0;
-      color: var(--muted);
-      line-height: 1.4;
-    }
-
+    h1 { margin: 0 0 6px; font-size: 24px; letter-spacing: 0; }
+    header p { margin: 0; color: var(--muted); line-height: 1.4; }
     main {
       width: min(1180px, calc(100% - 32px));
       margin: 22px auto;
       display: grid;
       gap: 16px;
     }
-
-    .toolbar,
-    .summary,
-    .panel {
+    .toolbar, .summary, .panel {
       background: var(--panel);
       border: 1px solid var(--line);
       border-radius: 8px;
     }
-
     .toolbar {
       padding: 16px;
-      display: grid;
-      grid-template-columns: 170px minmax(0, 1fr) auto auto auto auto auto auto;
+      display: flex;
+      flex-wrap: wrap;
       gap: 12px;
       align-items: center;
-      flex-wrap: wrap;
     }
-
+    .toolbar input[type="file"] {
+      flex: 1 1 200px;
+    }
     input[type="file"] {
-      width: 100%;
       padding: 10px;
       border: 1px dashed #aab6c8;
       border-radius: 8px;
@@ -115,7 +80,6 @@
       text-overflow: ellipsis;
       white-space: nowrap;
     }
-
     button {
       border: 0;
       border-radius: 8px;
@@ -126,54 +90,24 @@
       cursor: pointer;
       white-space: nowrap;
     }
-
-    button:hover {
-      background: var(--brand-dark);
-    }
-
-    button.secondary {
-      background: #e8eef7;
-      color: #183553;
-    }
-
-    button.secondary:hover {
-      background: #dce6f3;
-    }
-
+    button:hover { background: var(--brand-dark); }
+    button.secondary { background: #e8eef7; color: #183553; }
+    button.secondary:hover { background: #dce6f3; }
     .summary {
       padding: 14px;
       display: grid;
       grid-template-columns: repeat(7, minmax(0, 1fr));
       gap: 10px;
     }
-
     .metric {
       padding: 12px;
       border: 1px solid var(--line);
       border-radius: 8px;
       background: #fbfcff;
     }
-
-    .metric span {
-      display: block;
-      color: var(--muted);
-      font-size: 12px;
-      margin-bottom: 6px;
-    }
-
-    .metric strong {
-      display: block;
-      font-size: 18px;
-      max-width: 100%;
-      overflow: hidden;
-      text-overflow: ellipsis;
-      white-space: nowrap;
-    }
-
-    .panel {
-      overflow: hidden;
-    }
-
+    .metric span { display: block; color: var(--muted); font-size: 12px; margin-bottom: 6px; }
+    .metric strong { display: block; font-size: 18px; max-width: 100%; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+    .panel { overflow: hidden; }
     .panel-head {
       padding: 14px 16px;
       border-bottom: 1px solid var(--line);
@@ -183,15 +117,8 @@
       align-items: center;
       flex-wrap: wrap;
     }
-
-    .filters {
-      display: flex;
-      gap: 10px;
-      flex-wrap: wrap;
-    }
-
-    select,
-    input[type="search"] {
+    .filters { display: flex; gap: 10px; flex-wrap: wrap; }
+    select, input[type="search"] {
       border: 1px solid var(--line);
       border-radius: 8px;
       padding: 9px 10px;
@@ -199,56 +126,21 @@
       color: var(--text);
       min-height: 38px;
     }
-
-    table {
-      width: 100%;
-      border-collapse: collapse;
-    }
-
-    th,
-    td {
+    table { width: 100%; border-collapse: collapse; }
+    th, td {
       padding: 10px 12px;
       border-bottom: 1px solid var(--line);
       text-align: left;
       vertical-align: top;
       font-size: 14px;
     }
-
-    th {
-      background: #f8fafd;
-      color: #344054;
-      font-size: 12px;
-      text-transform: uppercase;
-    }
-
-    td.amount {
-      text-align: right;
-      font-variant-numeric: tabular-nums;
-      white-space: nowrap;
-    }
-
-    .category {
-      width: 170px;
-    }
-
-    .empty,
-    .status {
-      padding: 18px;
-      color: var(--muted);
-    }
-
-    .status.ok {
-      color: var(--good);
-    }
-
-    .status.warn {
-      color: var(--warn);
-    }
-
-    details {
-      padding: 0 16px 16px;
-    }
-
+    th { background: #f8fafd; color: #344054; font-size: 12px; text-transform: uppercase; }
+    td.amount { text-align: right; font-variant-numeric: tabular-nums; white-space: nowrap; }
+    .category { width: 170px; }
+    .empty, .status { padding: 18px; color: var(--muted); }
+    .status.ok { color: var(--good); }
+    .status.warn { color: var(--warn); }
+    details { padding: 0 16px 16px; }
     pre {
       max-height: 220px;
       overflow: auto;
@@ -259,23 +151,11 @@
       border-radius: 8px;
       font-size: 12px;
     }
-
     @media (max-width: 820px) {
-      .toolbar {
-        grid-template-columns: 1fr;
-      }
-
-      .summary {
-        grid-template-columns: repeat(2, minmax(130px, 1fr));
-      }
-
-      table {
-        min-width: 760px;
-      }
-
-      .table-wrap {
-        overflow-x: auto;
-      }
+      .toolbar { flex-direction: column; }
+      .summary { grid-template-columns: repeat(2, minmax(130px, 1fr)); }
+      table { min-width: 760px; }
+      .table-wrap { overflow-x: auto; }
     }
   </style>
 </head>
@@ -299,7 +179,8 @@
       <button id="exportButton" class="secondary">Exportar CSV</button>
       <button id="sheetsButton" class="secondary">Google Sheets</button>
       <button id="pdfButton" class="secondary">Exportar PDF</button>
-      <button id="saveButton" class="secondary">💾 Guardar cambios</button>
+      <button id="saveButton" class="secondary">💾 Guardar</button>
+      <button id="saveAsButton" class="secondary">💾 Guardar como</button>
       <button id="loadButton" class="secondary">📂 Cargar cambios</button>
     </section>
 
@@ -310,7 +191,7 @@
       <div class="metric"><span>Categoria principal</span><strong id="topCategoryMetric">-</strong></div>
       <div class="metric"><span>Saldo filtrado L</span><strong id="filteredMetric">L 0.00</strong></div>
       <div class="metric usd-wide"><span>USD aislado</span><strong id="filteredUsdMetric">$ 0.00</strong></div>
-      <div class="metric"><span>Archivo</span><strong id="fileMetric" title="-">-</strong></div>
+      <div class="metric"><span>Archivo guardado</span><strong id="savedFileMetric" title="-">-</strong></div>
     </section>
 
     <section class="panel">
@@ -393,22 +274,25 @@
     rawText: "",
     rawRows: [],
     selectedProfile: "auto",
-    activeProfile: "auto"
+    activeProfile: "auto",
+    currentFilename: null   // nombre del archivo activo para "Guardar"
   };
 
-  const fileInput = document.querySelector("#pdfFile");
-  const bankSelect = document.querySelector("#bankSelect");
-  const readButton = document.querySelector("#readButton");
-  const exportButton = document.querySelector("#exportButton");
-  const sheetsButton = document.querySelector("#sheetsButton");
-  const pdfButton = document.querySelector("#pdfButton");
-  const saveButton = document.querySelector("#saveButton");
-  const loadButton = document.querySelector("#loadButton");
-  const searchInput = document.querySelector("#searchInput");
-  const categoryFilter = document.querySelector("#categoryFilter");
-  const currencyFilter = document.querySelector("#currencyFilter");
-  const status = document.querySelector("#status");
-  const body = document.querySelector("#transactionsBody");
+  const fileInput       = document.querySelector("#pdfFile");
+  const bankSelect      = document.querySelector("#bankSelect");
+  const readButton      = document.querySelector("#readButton");
+  const exportButton    = document.querySelector("#exportButton");
+  const sheetsButton    = document.querySelector("#sheetsButton");
+  const pdfButton       = document.querySelector("#pdfButton");
+  const saveButton      = document.querySelector("#saveButton");
+  const saveAsButton    = document.querySelector("#saveAsButton");
+  const loadButton      = document.querySelector("#loadButton");
+  const searchInput     = document.querySelector("#searchInput");
+  const categoryFilter  = document.querySelector("#categoryFilter");
+  const currencyFilter  = document.querySelector("#currencyFilter");
+  const status          = document.querySelector("#status");
+  const body            = document.querySelector("#transactionsBody");
+  const savedFileMetric = document.querySelector("#savedFileMetric");
 
   categories.forEach((category) => {
     const option = document.createElement("option");
@@ -430,35 +314,32 @@
   sheetsButton.addEventListener("click", () => exportRows(getFilteredTransactions(), "movimientos_filtrados_google_sheets.csv"));
   pdfButton.addEventListener("click", () => exportFilteredPdf(getFilteredTransactions()));
   saveButton.addEventListener("click", saveEdits);
+  saveAsButton.addEventListener("click", saveEditsAs);
   loadButton.addEventListener("click", loadEdits);
   searchInput.addEventListener("input", render);
   categoryFilter.addEventListener("change", render);
   currencyFilter.addEventListener("change", render);
 
+  // ---------- PDF ----------
+
   async function readPdf() {
     const file = fileInput.files[0];
-    if (!file) {
-      setStatus("Selecciona primero el estado de cuenta PDF.", "warn");
-      return;
-    }
+    if (!file) { setStatus("Selecciona primero el estado de cuenta PDF.", "warn"); return; }
 
     setStatus("Leyendo PDF...");
-    document.querySelector("#fileMetric").textContent = file.name;
-    document.querySelector("#fileMetric").title = file.name;
 
     const data = new Uint8Array(await file.arrayBuffer());
-    const pdf = await pdfjs.getDocument({ data }).promise;
+    const pdf  = await pdfjs.getDocument({ data }).promise;
 
     const pages = [];
     const structuredRows = [];
 
-    for (let pageNumber = 1; pageNumber <= pdf.numPages; pageNumber += 1) {
-      const page = await pdf.getPage(pageNumber);
+    for (let p = 1; p <= pdf.numPages; p++) {
+      const page    = await pdf.getPage(p);
       const content = await page.getTextContent();
-
-      const pageLines = textItemsToRows(content.items);
-      pages.push(pageLines.join("\n"));
-      structuredRows.push(...pageLines.map((line) => ({ line, amountTokens: [] })));
+      const lines   = textItemsToRows(content.items);
+      pages.push(lines.join("\n"));
+      structuredRows.push(...lines.map((line) => ({ line, amountTokens: [] })));
     }
 
     state.rawRows = structuredRows;
@@ -475,275 +356,142 @@
     render();
   }
 
+  // ---------- parseo ----------
+
   function textItemsToRows(items) {
     const rows = [];
-
     items
-      .filter((item) => item.str && item.str.trim())
-      .map((item) => ({
-        text: item.str.trim(),
-        x: item.transform[4],
-        y: Math.round(item.transform[5] / 3) * 3
-      }))
+      .filter((i) => i.str && i.str.trim())
+      .map((i) => ({ text: i.str.trim(), x: i.transform[4], y: Math.round(i.transform[5] / 3) * 3 }))
       .sort((a, b) => b.y - a.y || a.x - b.x)
       .forEach((item) => {
-        let row = rows.find((candidate) => Math.abs(candidate.y - item.y) <= 3);
-        if (!row) {
-          row = { y: item.y, parts: [] };
-          rows.push(row);
-        }
+        let row = rows.find((c) => Math.abs(c.y - item.y) <= 3);
+        if (!row) { row = { y: item.y, parts: [] }; rows.push(row); }
         row.parts.push(item);
       });
-
     return rows
       .sort((a, b) => b.y - a.y)
-      .map((row) =>
-        row.parts
-          .sort((a, b) => a.x - b.x)
-          .map((part) => part.text)
-          .join(" ")
-          .replace(/\s+/g, " ")
-          .trim()
-      )
+      .map((row) => row.parts.sort((a, b) => a.x - b.x).map((p) => p.text).join(" ").replace(/\s+/g, " ").trim())
       .filter(Boolean);
   }
 
   function parseTransactions(text, rawRows = []) {
     if (state.selectedProfile === "auto") {
-      const attempts = Object.keys(profiles).map((profileKey) => ({
-        profileKey,
-        rows: parseTransactionsWithProfile(text, profileKey, rawRows)
-      }));
+      const attempts = Object.keys(profiles).map((k) => ({ k, rows: parseTransactionsWithProfile(text, k, rawRows) }));
       attempts.sort((a, b) => b.rows.length - a.rows.length);
-      state.activeProfile = attempts[0]?.profileKey || "auto";
+      state.activeProfile = attempts[0]?.k || "auto";
       return attempts[0]?.rows || [];
     }
-
     state.activeProfile = state.selectedProfile;
     return parseTransactionsWithProfile(text, state.selectedProfile, rawRows);
   }
 
   function parseTransactionsWithProfile(text, profileKey, rawRows = []) {
-    const datePattern = "(?:\\d{1,2}[/-]\\d{1,2}(?:[/-]\\d{2,4})?|\\d{1,2}[-\\s]+(?:ENE|FEB|MAR|ABR|MAY|JUN|JUL|AGO|SEP|OCT|NOV|DIC)\\.?\\s*(?:\\d{2,4})?)";
+    const dp = "(?:\\d{1,2}[/-]\\d{1,2}(?:[/-]\\d{2,4})?|\\d{1,2}[-\\s]+(?:ENE|FEB|MAR|ABR|MAY|JUN|JUL|AGO|SEP|OCT|NOV|DIC)\\.?\\s*(?:\\d{2,4})?)";
     const normalized = text
-      .replace(new RegExp(`\\b(${datePattern})\\b`, "gi"), "\n$1")
+      .replace(new RegExp(`\\b(${dp})\\b`, "gi"), "\n$1")
       .replace(/[ \t]{2,}/g, " ");
-
-    const directRows = normalized
-      .split(/\n+/)
-      .map((line) => line.trim())
-      .filter(Boolean)
-      .flatMap((line) => parseLine(line, profileKey, rawRows) || [])
-      .filter(Boolean);
-
-    return mergeDuplicateTransactions(directRows);
+    const rows = normalized.split(/\n+/).map((l) => l.trim()).filter(Boolean)
+      .flatMap((l) => parseLine(l, profileKey, rawRows) || []).filter(Boolean);
+    return mergeDuplicateTransactions(rows);
   }
 
   function parseLine(line, profileKey = "ficohsa", rawRows = []) {
     if (profileKey === "ficohsa") return parseFicohsaLine(line, rawRows);
-
     const profile = profiles[profileKey] || profiles.ficohsa;
     if (profile.skip?.test(line)) return null;
-
     const dateMatch = line.match(/^(\d{1,2}[/-]\d{1,2}(?:[/-]\d{2,4})?|\d{1,2}[-\s]+(?:ENE|FEB|MAR|ABR|MAY|JUN|JUL|AGO|SEP|OCT|NOV|DIC)\.?\s*(?:\d{2,4})?)/i);
     if (!dateMatch) return null;
-
     const amounts = [...line.matchAll(/(?:L\.?|HNL|USD|\$)?\s*-?(?:\d{1,3}(?:,\d{3})+|\d+)(?:\.\d{2})-?\s*(?:CR|DR|C|D)?/gi)];
-    if (amounts.length === 0) return null;
-
-    const selectedAmount = selectAmount(amounts, profile.amountMode);
-    const amountText = selectedAmount[0];
-    const amount = parseAmount(amountText);
+    if (!amounts.length) return null;
+    const sel = selectAmount(amounts, profile.amountMode);
+    const amount = parseAmount(sel[0]);
     if (!Number.isFinite(amount)) return null;
-
-    const date = dateMatch[1];
-    const description = line
-      .slice(dateMatch[0].length, selectedAmount.index)
+    const description = line.slice(dateMatch[0].length, sel.index)
       .replace(/\b(?:compra|consumo|retiro|pago|fecha|descripcion|descripci[oó]n|debito|d[eé]bito|credito|cr[eé]dito|saldo|valor|monto)\b/gi, "")
-      .replace(/\b\d{2}[/-]\d{2}(?:[/-]\d{2,4})?\b/g, "")
-      .replace(/\s+/g, " ")
-      .trim();
-
+      .replace(/\b\d{2}[/-]\d{2}(?:[/-]\d{2,4})?\b/g, "").replace(/\s+/g, " ").trim();
     if (!description || description.length < 3) return null;
-
-    const looksLikeCredit = isCreditTransaction(`${description} ${amountText}`);
-    const currency = detectCurrency(`${line} ${amountText}`);
-    const signedAmount = looksLikeCredit ? -Math.abs(amount) : Math.abs(amount);
-
-    return {
-      id: crypto.randomUUID(),
-      date,
-      description,
-      category: categorize(description),
-      amount: Math.abs(amount),
-      signedAmount,
-      currency,
-      type: looksLikeCredit ? "Credito" : "Gasto",
-      originalLine: line,
-      includeInTotals: true,
-      manualAmount: null
-    };
+    const credit   = isCreditTransaction(`${description} ${sel[0]}`);
+    const currency = detectCurrency(`${line} ${sel[0]}`);
+    return { id: crypto.randomUUID(), date: dateMatch[1], description, category: categorize(description),
+      amount: Math.abs(amount), signedAmount: credit ? -Math.abs(amount) : Math.abs(amount),
+      currency, type: credit ? "Credito" : "Gasto", originalLine: line, includeInTotals: true, manualAmount: null };
   }
 
   function parseFicohsaLine(line, rawRows = []) {
-    const trimmed = line.trim();
-    if (!trimmed) return null;
-    if (/^[+\-=]?\s*TOTAL\b|^RESUMEN\b|^INFORMACI[OÓ]N\b|^L[IÍ]NEA\b|^EXTRAFINANCIAMIENTO\b/i.test(trimmed)) return null;
-
-    const balanceMatch = trimmed.match(/^Saldo\s+Anterior\s+(-?(?:\d{1,3}(?:,\d{3})+|\d+)(?:\.\d{2})-?)\s+(-?(?:\d{1,3}(?:,\d{3})+|\d+)(?:\.\d{2})-?)?/i);
-    if (balanceMatch) {
-      const rows = [buildTransaction({
-        date: "Saldo anterior",
-        description: "Saldo anterior Ficohsa",
-        category: "Saldo anterior",
-        rawAmount: balanceMatch[1],
-        currency: "HNL",
-        forceCredit: false,
-        originalLine: line
-      })];
-
-      if (balanceMatch[2] && parseAmount(balanceMatch[2]) !== 0) {
-        rows.push(buildTransaction({
-          date: "Saldo anterior",
-          description: "Saldo anterior Ficohsa USD",
-          category: "Saldo anterior",
-          rawAmount: balanceMatch[2],
-          currency: "USD",
-          forceCredit: false,
-          originalLine: line
-        }));
-      }
+    const t = line.trim();
+    if (!t) return null;
+    if (/^[+\-=]?\s*TOTAL\b|^RESUMEN\b|^INFORMACI[OÓ]N\b|^L[IÍ]NEA\b|^EXTRAFINANCIAMIENTO\b/i.test(t)) return null;
+    const bm = t.match(/^Saldo\s+Anterior\s+(-?(?:\d{1,3}(?:,\d{3})+|\d+)(?:\.\d{2})-?)\s+(-?(?:\d{1,3}(?:,\d{3})+|\d+)(?:\.\d{2})-?)?/i);
+    if (bm) {
+      const rows = [buildTransaction({ date:"Saldo anterior", description:"Saldo anterior Ficohsa", category:"Saldo anterior", rawAmount:bm[1], currency:"HNL", forceCredit:false, originalLine:line })];
+      if (bm[2] && parseAmount(bm[2]) !== 0)
+        rows.push(buildTransaction({ date:"Saldo anterior", description:"Saldo anterior Ficohsa USD", category:"Saldo anterior", rawAmount:bm[2], currency:"USD", forceCredit:false, originalLine:line }));
       return rows;
     }
-
-    const dateMatch = trimmed.match(/^(\d{1,2}[/-]\d{1,2}(?:[/-]\d{2,4})?|\d{1,2}\s+[A-Z]{3}\.?\s+\d{2,4})/i);
-    if (!dateMatch) return null;
-
-    const amountMatches = [...trimmed.matchAll(/(?:L\.?|HNL|USD|US\$|\$)?\s*-?(?:\d{1,3}(?:,\d{3})+|\d+)(?:\.\d{2})-?/gi)];
-    if (amountMatches.length === 0) return null;
-
-    const selectedAmount = amountMatches[amountMatches.length - 1];
-    const rawAmount = selectedAmount[0];
-    const amount = parseAmount(rawAmount);
+    const dm = t.match(/^(\d{1,2}[/-]\d{1,2}(?:[/-]\d{2,4})?|\d{1,2}\s+[A-Z]{3}\.?\s+\d{2,4})/i);
+    if (!dm) return null;
+    const ams = [...t.matchAll(/(?:L\.?|HNL|USD|US\$|\$)?\s*-?(?:\d{1,3}(?:,\d{3})+|\d+)(?:\.\d{2})-?/gi)];
+    if (!ams.length) return null;
+    const sel = ams[ams.length - 1];
+    const amount = parseAmount(sel[0]);
     if (!Number.isFinite(amount)) return null;
-
-    const description = trimmed
-      .slice(dateMatch[0].length, selectedAmount.index)
-      .replace(/\b\d{5,}\b/g, "")
-      .replace(/\s+/g, " ")
-      .trim();
-
+    const description = t.slice(dm[0].length, sel.index).replace(/\b\d{5,}\b/g, "").replace(/\s+/g, " ").trim();
     if (!description || description.length < 3) return null;
-
-    const currency = detectFicohsaCurrency(trimmed, description, rawAmount, amount);
-
-    return buildTransaction({
-      date: dateMatch[1],
-      description,
-      category: categorize(description),
-      rawAmount,
-      currency,
-      forceCredit: isCreditTransaction(`${rawAmount} ${description}`),
-      originalLine: line
-    });
+    return buildTransaction({ date:dm[1], description, category:categorize(description), rawAmount:sel[0],
+      currency:detectFicohsaCurrency(t, description, sel[0], amount),
+      forceCredit:isCreditTransaction(`${sel[0]} ${description}`), originalLine:line });
   }
 
-  function parseAmount(value) {
-    const clean = String(value)
-      .replace(/HNL|USD|US\$|L\.?|\$/gi, "")
-      .replace(/\b(?:CR|DR|C|D)\b/gi, "")
-      .replace(/,/g, "")
-      .replace(/-$/, "")
-      .trim();
-    return Number.parseFloat(clean);
+  function parseAmount(v) {
+    return Number.parseFloat(String(v).replace(/HNL|USD|US\$|L\.?|\$/gi,"").replace(/\b(?:CR|DR|C|D)\b/gi,"").replace(/,/g,"").replace(/-$/,"").trim());
   }
-
-  function isCreditTransaction(value) {
-    const clean = String(value).trim();
-    return /(?:^|\s)-\d|-$/i.test(clean) ||
-      /(?:^|\s)(?:pago|abono|credito|cr[eé]dito|cr\b|reversion|reversi[oó]n|devolucion|devoluci[oó]n|descuento|bonificaci[oó]n|bono|ajuste\s+a\s+favor|gracias\s+por\s+su\s+pago)(?:\s|$)/i.test(clean);
+  function isCreditTransaction(v) {
+    const c = String(v).trim();
+    return /(?:^|\s)-\d|-$/i.test(c) ||
+      /(?:^|\s)(?:pago|abono|credito|cr[eé]dito|cr\b|reversion|reversi[oó]n|devolucion|devoluci[oó]n|descuento|bonificaci[oó]n|bono|ajuste\s+a\s+favor|gracias\s+por\s+su\s+pago)(?:\s|$)/i.test(c);
   }
-
-  function detectCurrency(value) {
-    return /USD|US\$|DOLAR|D[OÓ]LAR|\$/i.test(String(value)) ? "USD" : "HNL";
-  }
-
-  function detectFicohsaCurrency(line, description, rawAmount, amount) {
-    if (detectCurrency(`${line} ${rawAmount}`) === "USD") return "USD";
-    if (/\b(?:WA|FL|CA|TX|NY|NJ|GA|AZ|IL|PA|US|USA)\b|amazon|google|apple|paypal|microsoft|netflix|spotify/i.test(description)) return "USD";
-    if (/gracias\s+por\s+su\s+pago/i.test(description) && Math.abs(amount) < 100) return "USD";
+  function detectCurrency(v) { return /USD|US\$|DOLAR|D[OÓ]LAR|\$/i.test(String(v)) ? "USD" : "HNL"; }
+  function detectFicohsaCurrency(line, desc, raw, amount) {
+    if (detectCurrency(`${line} ${raw}`) === "USD") return "USD";
+    if (/\b(?:WA|FL|CA|TX|NY|NJ|GA|AZ|IL|PA|US|USA)\b|amazon|google|apple|paypal|microsoft|netflix|spotify/i.test(desc)) return "USD";
+    if (/gracias\s+por\s+su\s+pago/i.test(desc) && Math.abs(amount) < 100) return "USD";
     return "HNL";
   }
-
   function buildTransaction({ date, description, category, rawAmount, currency, forceCredit, originalLine }) {
     const amount = parseAmount(rawAmount);
     const credit = forceCredit || isCreditTransaction(`${rawAmount} ${description}`);
-    return {
-      id: crypto.randomUUID(),
-      date,
-      description,
-      category,
-      amount: Math.abs(amount),
-      signedAmount: credit ? -Math.abs(amount) : Math.abs(amount),
-      currency,
-      type: credit ? "Credito" : "Gasto",
-      originalLine,
-      includeInTotals: true,
-      manualAmount: null
-    };
+    return { id:crypto.randomUUID(), date, description, category, amount:Math.abs(amount),
+      signedAmount: credit ? -Math.abs(amount) : Math.abs(amount), currency,
+      type: credit ? "Credito" : "Gasto", originalLine, includeInTotals:true, manualAmount:null };
   }
-
   function selectAmount(amounts, mode) {
     if (amounts.length === 1) return amounts[0];
-    if (mode === "last") return amounts[amounts.length - 1];
+    if (mode === "last")   return amounts[amounts.length - 1];
     if (mode === "second") return amounts[1] || amounts[0];
     return amounts[0];
   }
-
-  function profileLabel(profileKey) {
-    return profiles[profileKey]?.label || "Auto";
-  }
-
-  function mergeDuplicateTransactions(transactions) {
+  function profileLabel(k) { return profiles[k]?.label || "Auto"; }
+  function mergeDuplicateTransactions(txs) {
     const seen = new Set();
-    return transactions.filter((transaction) => {
-      const key = [
-        String(transaction.date).toUpperCase(),
-        String(transaction.description).toUpperCase(),
-        Number(transaction.amount || 0).toFixed(2),
-        transaction.type
-      ].join("|");
-      if (seen.has(key)) return false;
-      seen.add(key);
-      return true;
+    return txs.filter((tx) => {
+      const key = [String(tx.date).toUpperCase(), String(tx.description).toUpperCase(), Number(tx.amount||0).toFixed(2), tx.type].join("|");
+      if (seen.has(key)) return false; seen.add(key); return true;
     });
   }
-
-  function categorize(description) {
-    const found = categoryRules.find(([, pattern]) => pattern.test(description));
+  function categorize(desc) {
+    const found = categoryRules.find(([, p]) => p.test(desc));
     return found ? found[0] : "Pets";
   }
-
   function buildStableKey(tx) {
-    return [
-      String(tx.date || "").trim().toUpperCase(),
-      String(tx.description || "").trim().toUpperCase(),
-      Number(tx.amount || 0).toFixed(2),
-      String(tx.currency || "").trim().toUpperCase()
-    ].join("|");
+    return [String(tx.date||"").trim().toUpperCase(), String(tx.description||"").trim().toUpperCase(),
+      Number(tx.amount||0).toFixed(2), String(tx.currency||"").trim().toUpperCase()].join("|");
   }
 
-  function saveEdits() {
-    if (!state.transactions.length) {
-      setStatus("No hay movimientos para guardar.", "warn");
-      return;
-    }
+  // ---------- Guardar / Guardar como ----------
 
-    const bankLabel = profileLabel(state.activeProfile).toLowerCase().replace(/\s+/g, "_");
-    const dateStr = new Date().toISOString().slice(0, 10);
-    const filename = `edits_${bankLabel}_${dateStr}.json`;
-
-    const payload = {
+  function buildPayload() {
+    return {
       savedAt: new Date().toISOString(),
       bank: state.activeProfile,
       edits: state.transactions.map((tx) => ({
@@ -755,15 +503,48 @@
         manualAmount: tx.manualAmount
       }))
     };
+  }
 
+  function downloadJson(payload, filename) {
     const blob = new Blob([JSON.stringify(payload, null, 2)], { type: "application/json" });
     const link = document.createElement("a");
     link.href = URL.createObjectURL(blob);
     link.download = filename;
     link.click();
     URL.revokeObjectURL(link.href);
-    setStatus(`✅ Cambios guardados como "${filename}" (${payload.edits.length} movimientos).`, "ok");
   }
+
+  function setCurrentFilename(name) {
+    state.currentFilename = name;
+    savedFileMetric.textContent = name;
+    savedFileMetric.title = name;
+  }
+
+  // 💾 Guardar — usa el nombre que ya había; si no hay nombre previo actúa como "Guardar como"
+  function saveEdits() {
+    if (!state.transactions.length) { setStatus("No hay movimientos para guardar.", "warn"); return; }
+    if (!state.currentFilename) { saveEditsAs(); return; }
+    const payload = buildPayload();
+    downloadJson(payload, state.currentFilename);
+    setStatus(`✅ Guardado como "${state.currentFilename}" (${payload.edits.length} movimientos).`, "ok");
+  }
+
+  // 💾 Guardar como — pide un nombre nuevo al usuario
+  function saveEditsAs() {
+    if (!state.transactions.length) { setStatus("No hay movimientos para guardar.", "warn"); return; }
+    const bankLabel = profileLabel(state.activeProfile).toLowerCase().replace(/\s+/g, "_");
+    const dateStr   = new Date().toISOString().slice(0, 10);
+    const suggested = state.currentFilename || `edits_${bankLabel}_${dateStr}.json`;
+    const nombre    = window.prompt("Nombre del archivo:", suggested);
+    if (!nombre) return; // el usuario canceló
+    const filename = nombre.endsWith(".json") ? nombre : `${nombre}.json`;
+    const payload  = buildPayload();
+    downloadJson(payload, filename);
+    setCurrentFilename(filename);
+    setStatus(`✅ Guardado como "${filename}" (${payload.edits.length} movimientos).`, "ok");
+  }
+
+  // ---------- Cargar ----------
 
   function loadEdits() {
     const input = document.createElement("input");
@@ -772,325 +553,203 @@
     input.addEventListener("change", async () => {
       const file = input.files[0];
       if (!file) return;
-
       let payload;
       try {
-        const text = await file.text();
-        payload = JSON.parse(text);
+        payload = JSON.parse(await file.text());
       } catch {
-        setStatus("El archivo seleccionado no es un JSON válido.", "warn");
-        return;
+        setStatus("El archivo seleccionado no es un JSON válido.", "warn"); return;
       }
-
       if (!state.transactions.length) {
-        setStatus("Primero lee un PDF para aplicar los cambios guardados.", "warn");
-        return;
+        setStatus("Primero lee un PDF para aplicar los cambios guardados.", "warn"); return;
       }
-
       const map = new Map((payload.edits || []).map((e) => [e.key, e]));
       let applied = 0;
-
       state.transactions.forEach((tx) => {
         const edit = map.get(buildStableKey(tx));
         if (!edit) return;
-
-        tx.category = edit.category ?? tx.category;
-        tx.currency = edit.currency ?? tx.currency;
+        tx.category        = edit.category ?? tx.category;
+        tx.currency        = edit.currency ?? tx.currency;
         tx.includeInTotals = edit.includeInTotals !== false;
-
         if (Number.isFinite(Number(edit.signedAmount))) {
           tx.signedAmount = Number(edit.signedAmount);
-          tx.amount = Math.abs(tx.signedAmount);
-          tx.type = tx.signedAmount < 0 ? "Credito" : "Gasto";
+          tx.amount       = Math.abs(tx.signedAmount);
+          tx.type         = tx.signedAmount < 0 ? "Credito" : "Gasto";
         }
-
         tx.manualAmount = edit.manualAmount ?? tx.manualAmount;
-        applied += 1;
+        applied++;
       });
-
+      setCurrentFilename(file.name);
       render();
       setStatus(`✅ Cambios recuperados desde "${file.name}": ${applied} movimiento(s) restaurados.`, applied ? "ok" : "warn");
     });
     input.click();
   }
 
+  // ---------- Render ----------
+
   function render() {
     const rows = getFilteredTransactions();
     body.innerHTML = "";
-
-    const tableHeadRow = document.querySelector("thead tr");
-    if (tableHeadRow && !document.querySelector("#thInclude")) {
-      const th = document.createElement("th");
-      th.id = "thInclude";
-      th.textContent = "Incluir";
-      tableHeadRow.appendChild(th);
+    const thead = document.querySelector("thead tr");
+    if (thead && !document.querySelector("#thInclude")) {
+      const th = document.createElement("th"); th.id = "thInclude"; th.textContent = "Incluir"; thead.appendChild(th);
     }
-
-    if (rows.length === 0) {
+    if (!rows.length) {
       body.innerHTML = '<tr><td class="empty" colspan="7">No hay movimientos para mostrar.</td></tr>';
     } else {
-      rows.forEach((transaction) => {
+      rows.forEach((tx) => {
         const row = document.createElement("tr");
         row.innerHTML = `
-          <td>${escapeHtml(transaction.date)}</td>
-          <td>${escapeHtml(transaction.description)}</td>
-          <td>${categorySelect(transaction)}</td>
-          <td class="amount">${amountInput(transaction)}</td>
-          <td>${currencySelect(transaction)}</td>
-          <td>${transaction.type}</td>
-          <td>${includeSelect(transaction)}</td>
-        `;
+          <td>${escapeHtml(tx.date)}</td>
+          <td>${escapeHtml(tx.description)}</td>
+          <td>${categorySelect(tx)}</td>
+          <td class="amount">${amountInput(tx)}</td>
+          <td>${currencySelect(tx)}</td>
+          <td>${tx.type}</td>
+          <td>${includeSelect(tx)}</td>`;
         body.appendChild(row);
       });
     }
-
-    body.querySelectorAll("select[data-id]").forEach((select) => {
-      select.addEventListener("change", () => {
-        const transaction = state.transactions.find((item) => item.id === select.dataset.id);
-        if (!transaction) return;
-        transaction.category = select.value;
-        render();
-      });
-    });
-
-    body.querySelectorAll("select[data-currency-id]").forEach((select) => {
-      select.addEventListener("change", () => {
-        const transaction = state.transactions.find((item) => item.id === select.dataset.currencyId);
-        if (!transaction) return;
-        transaction.currency = select.value;
-        render();
-      });
-    });
-
-    body.querySelectorAll("select[data-include-id]").forEach((select) => {
-      select.addEventListener("change", () => {
-        const transaction = state.transactions.find((item) => item.id === select.dataset.includeId);
-        if (!transaction) return;
-        transaction.includeInTotals = select.value === "yes";
-        render();
-      });
-    });
-
-    body.querySelectorAll("input[data-amount-id]").forEach((input) => {
-      input.addEventListener("change", () => {
-        const transaction = state.transactions.find((item) => item.id === input.dataset.amountId);
-        if (!transaction) return;
-        const parsed = Number(input.value);
-        if (!Number.isFinite(parsed)) return;
-        transaction.manualAmount = parsed;
-        transaction.signedAmount = parsed;
-        transaction.amount = Math.abs(parsed);
-        transaction.type = parsed < 0 ? "Credito" : "Gasto";
-        render();
-      });
-    });
-
+    body.querySelectorAll("select[data-id]").forEach((s) => s.addEventListener("change", () => {
+      const tx = state.transactions.find((t) => t.id === s.dataset.id); if (!tx) return; tx.category = s.value; render();
+    }));
+    body.querySelectorAll("select[data-currency-id]").forEach((s) => s.addEventListener("change", () => {
+      const tx = state.transactions.find((t) => t.id === s.dataset.currencyId); if (!tx) return; tx.currency = s.value; render();
+    }));
+    body.querySelectorAll("select[data-include-id]").forEach((s) => s.addEventListener("change", () => {
+      const tx = state.transactions.find((t) => t.id === s.dataset.includeId); if (!tx) return; tx.includeInTotals = s.value === "yes"; render();
+    }));
+    body.querySelectorAll("input[data-amount-id]").forEach((inp) => inp.addEventListener("change", () => {
+      const tx = state.transactions.find((t) => t.id === inp.dataset.amountId); if (!tx) return;
+      const parsed = Number(inp.value); if (!Number.isFinite(parsed)) return;
+      tx.manualAmount = parsed; tx.signedAmount = parsed; tx.amount = Math.abs(parsed);
+      tx.type = parsed < 0 ? "Credito" : "Gasto"; render();
+    }));
     updateMetrics(rows);
   }
 
   function getFilteredTransactions() {
-    const search = searchInput.value.trim().toLowerCase();
+    const search   = searchInput.value.trim().toLowerCase();
     const category = categoryFilter.value;
     const currency = currencyFilter.value;
-
-    return state.transactions.filter((transaction) => {
-      const matchesSearch = !search || transaction.description.toLowerCase().includes(search);
-      const matchesCategory = !category || transaction.category === category;
-      const matchesCurrency = !currency || transaction.currency === currency;
-      return matchesSearch && matchesCategory && matchesCurrency;
-    });
+    return state.transactions.filter((tx) =>
+      (!search   || tx.description.toLowerCase().includes(search)) &&
+      (!category || tx.category === category) &&
+      (!currency || tx.currency === currency)
+    );
   }
 
-  function categorySelect(transaction) {
-    const options = categories.map((category) => {
-      const selected = category === transaction.category ? "selected" : "";
-      return `<option value="${escapeHtml(category)}" ${selected}>${escapeHtml(category)}</option>`;
-    }).join("");
-    return `<select class="category" data-id="${transaction.id}">${options}</select>`;
+  function categorySelect(tx) {
+    const opts = categories.map((c) => `<option value="${escapeHtml(c)}" ${c === tx.category ? "selected" : ""}>${escapeHtml(c)}</option>`).join("");
+    return `<select class="category" data-id="${tx.id}">${opts}</select>`;
   }
-
-  function currencySelect(transaction) {
-    return `
-      <select data-currency-id="${transaction.id}">
-        <option value="HNL" ${transaction.currency === "HNL" ? "selected" : ""}>HNL</option>
-        <option value="USD" ${transaction.currency === "USD" ? "selected" : ""}>USD</option>
-      </select>
-    `;
+  function currencySelect(tx) {
+    return `<select data-currency-id="${tx.id}">
+      <option value="HNL" ${tx.currency==="HNL"?"selected":""}>HNL</option>
+      <option value="USD" ${tx.currency==="USD"?"selected":""}>USD</option>
+    </select>`;
   }
-
-  function includeSelect(transaction) {
-    const include = transaction.includeInTotals !== false;
-    return `
-      <select data-include-id="${transaction.id}">
-        <option value="yes" ${include ? "selected" : ""}>Si</option>
-        <option value="no" ${!include ? "selected" : ""}>No</option>
-      </select>
-    `;
+  function includeSelect(tx) {
+    const inc = tx.includeInTotals !== false;
+    return `<select data-include-id="${tx.id}">
+      <option value="yes" ${inc?"selected":""}>Si</option>
+      <option value="no"  ${!inc?"selected":""}>No</option>
+    </select>`;
   }
-
-  function amountInput(transaction) {
-    const value = Number(transaction.signedAmount || 0).toFixed(2);
-    return `<input data-amount-id="${transaction.id}" type="number" step="0.01" value="${value}" style="width:120px;text-align:right;">`;
+  function amountInput(tx) {
+    return `<input data-amount-id="${tx.id}" type="number" step="0.01" value="${Number(tx.signedAmount||0).toFixed(2)}" style="width:120px;text-align:right;">`;
   }
 
   function updateMetrics(filteredRows = getFilteredTransactions()) {
-    const all = state.transactions;
-    const includedAll = all.filter((item) => item.includeInTotals !== false);
-    const includedFiltered = filteredRows.filter((item) => item.includeInTotals !== false);
-
-    const hnlRows = includedAll.filter((item) => item.currency === "HNL");
-    const filteredHnlRows = includedFiltered.filter((item) => item.currency === "HNL");
-    const filteredUsdRows = includedFiltered.filter((item) => item.currency === "USD");
-
-    const hnlDebits = hnlRows.filter((item) =>
-      item.signedAmount > 0 &&
-      item.category !== "Saldo anterior" &&
-      !/saldo anterior/i.test(item.description)
-    );
-    const hnlCredits = hnlRows.filter((item) => item.signedAmount < 0);
-
-    const categoryTotals = new Map();
-    const sourceForTop = includedFiltered.length ? includedFiltered : includedAll;
-    sourceForTop
-      .filter((item) => item.signedAmount > 0 && item.category !== "Saldo anterior")
-      .forEach((item) => {
-        categoryTotals.set(item.category, (categoryTotals.get(item.category) || 0) + item.signedAmount);
-      });
-
-    const topCategory = [...categoryTotals.entries()].sort((a, b) => b[1] - a[1])[0];
-
-    document.querySelector("#countMetric").textContent = includedAll.length;
-    document.querySelector("#debitMetric").textContent = `L ${formatMoney(sumSigned(hnlDebits))}`;
-    document.querySelector("#creditMetric").textContent = `L ${formatMoney(sumSigned(hnlCredits))}`;
-    document.querySelector("#topCategoryMetric").textContent = topCategory ? topCategory[0] : "-";
-    document.querySelector("#filteredMetric").textContent = `L ${formatMoney(sumSigned(filteredHnlRows))}`;
-    document.querySelector("#filteredUsdMetric").textContent = `${filteredUsdRows.length} mov. / $ ${formatMoney(sumSigned(filteredUsdRows))}`;
+    const all              = state.transactions;
+    const includedAll      = all.filter((i) => i.includeInTotals !== false);
+    const includedFiltered = filteredRows.filter((i) => i.includeInTotals !== false);
+    const hnlRows          = includedAll.filter((i) => i.currency === "HNL");
+    const filtHnl          = includedFiltered.filter((i) => i.currency === "HNL");
+    const filtUsd          = includedFiltered.filter((i) => i.currency === "USD");
+    const hnlDebits        = hnlRows.filter((i) => i.signedAmount > 0 && i.category !== "Saldo anterior" && !/saldo anterior/i.test(i.description));
+    const hnlCredits       = hnlRows.filter((i) => i.signedAmount < 0);
+    const totals = new Map();
+    (includedFiltered.length ? includedFiltered : includedAll)
+      .filter((i) => i.signedAmount > 0 && i.category !== "Saldo anterior")
+      .forEach((i) => totals.set(i.category, (totals.get(i.category) || 0) + i.signedAmount));
+    const top = [...totals.entries()].sort((a, b) => b[1] - a[1])[0];
+    document.querySelector("#countMetric").textContent        = includedAll.length;
+    document.querySelector("#debitMetric").textContent        = `L ${formatMoney(sumSigned(hnlDebits))}`;
+    document.querySelector("#creditMetric").textContent       = `L ${formatMoney(sumSigned(hnlCredits))}`;
+    document.querySelector("#topCategoryMetric").textContent  = top ? top[0] : "-";
+    document.querySelector("#filteredMetric").textContent     = `L ${formatMoney(sumSigned(filtHnl))}`;
+    document.querySelector("#filteredUsdMetric").textContent  = `${filtUsd.length} mov. / $ ${formatMoney(sumSigned(filtUsd))}`;
   }
 
+  // ---------- Exportar CSV / PDF ----------
+
   function exportRows(rows, filename) {
-    const exportable = rows.filter((item) => item.includeInTotals !== false);
-    if (exportable.length === 0) {
-      setStatus("No hay movimientos filtrados para exportar.", "warn");
-      return;
-    }
-
-    const header = ["Fecha", "Descripcion", "Categoria", "Monto", "Moneda", "Tipo"];
-    const lines = exportable.map((item) => [
-      item.date, item.description, item.category, item.signedAmount.toFixed(2), item.currency, item.type
-    ]);
-
-    const csv = [header, ...lines].map((row) => row.map(csvCell).join(",")).join("\n");
-    const blob = new Blob([csv], { type: "text/csv;charset=utf-8" });
-    const link = document.createElement("a");
-    link.href = URL.createObjectURL(blob);
-    link.download = filename;
-    link.click();
-    URL.revokeObjectURL(link.href);
-    setStatus(`Exportados ${exportable.length} movimientos filtrados.`, "ok");
+    const exp = rows.filter((i) => i.includeInTotals !== false);
+    if (!exp.length) { setStatus("No hay movimientos filtrados para exportar.", "warn"); return; }
+    const header = ["Fecha","Descripcion","Categoria","Monto","Moneda","Tipo"];
+    const lines  = exp.map((i) => [i.date, i.description, i.category, i.signedAmount.toFixed(2), i.currency, i.type]);
+    const csv    = [header, ...lines].map((r) => r.map(csvCell).join(",")).join("\n");
+    const blob   = new Blob([csv], { type: "text/csv;charset=utf-8" });
+    const link   = document.createElement("a");
+    link.href = URL.createObjectURL(blob); link.download = filename; link.click(); URL.revokeObjectURL(link.href);
+    setStatus(`Exportados ${exp.length} movimientos filtrados.`, "ok");
   }
 
   function exportFilteredPdf(rows) {
-    const exportable = rows.filter((item) => item.includeInTotals !== false);
-    if (exportable.length === 0) {
-      setStatus("No hay movimientos filtrados para exportar en PDF.", "warn");
-      return;
-    }
-
-    if (!window.jspdf?.jsPDF) {
-      setStatus("No pude cargar el generador de PDF. Revisa tu conexion a internet y recarga la pagina.", "warn");
-      return;
-    }
-
+    const exp = rows.filter((i) => i.includeInTotals !== false);
+    if (!exp.length) { setStatus("No hay movimientos filtrados para exportar en PDF.", "warn"); return; }
+    if (!window.jspdf?.jsPDF) { setStatus("No pude cargar el generador de PDF. Revisa tu conexion a internet y recarga la pagina.", "warn"); return; }
     const { jsPDF } = window.jspdf;
     const doc = new jsPDF({ unit: "pt", format: "letter" });
     const margin = 36;
-    const category = categoryFilter.value || "Todas";
-    const currency = currencyFilter.value || "Todas";
-    const search = searchInput.value.trim() || "Sin busqueda";
-    const totalHnl = sumSigned(exportable.filter((item) => item.currency === "HNL"));
-    const totalUsd = sumSigned(exportable.filter((item) => item.currency === "USD"));
     let y = 42;
-
-    doc.setFont("helvetica", "bold");
-    doc.setFontSize(16);
-    doc.text("Movimientos filtrados - Ficohsa", margin, y);
-
-    y += 22;
-    doc.setFont("helvetica", "normal");
-    doc.setFontSize(10);
-    doc.text(`Categoria: ${category}`, margin, y); y += 14;
-    doc.text(`Moneda: ${currency}`, margin, y); y += 14;
-    doc.text(`Busqueda: ${search}`, margin, y); y += 14;
-    doc.text(`Movimientos: ${exportable.length}`, margin, y); y += 14;
-    doc.text(`Saldo filtrado L: L ${formatMoney(totalHnl)}`, margin, y); y += 14;
-    doc.text(`USD aislado: $ ${formatMoney(totalUsd)} (no mezclado con lempiras)`, margin, y);
-
-    y += 24;
-    drawPdfHeader(doc, margin, y);
-    y += 18;
-
-    exportable.forEach((item) => {
-      if (y > 730) {
-        doc.addPage();
-        y = 42;
-        drawPdfHeader(doc, margin, y);
-        y += 18;
-      }
-      doc.setFont("helvetica", "normal");
-      doc.setFontSize(9);
+    doc.setFont("helvetica","bold"); doc.setFontSize(16);
+    doc.text("Movimientos filtrados - Ficohsa", margin, y); y += 22;
+    doc.setFont("helvetica","normal"); doc.setFontSize(10);
+    doc.text(`Categoria: ${categoryFilter.value||"Todas"}`, margin, y); y += 14;
+    doc.text(`Moneda: ${currencyFilter.value||"Todas"}`, margin, y); y += 14;
+    doc.text(`Busqueda: ${searchInput.value.trim()||"Sin busqueda"}`, margin, y); y += 14;
+    doc.text(`Movimientos: ${exp.length}`, margin, y); y += 14;
+    doc.text(`Saldo filtrado L: L ${formatMoney(sumSigned(exp.filter((i)=>i.currency==="HNL")))}`, margin, y); y += 14;
+    doc.text(`USD aislado: $ ${formatMoney(sumSigned(exp.filter((i)=>i.currency==="USD")))} (no mezclado con lempiras)`, margin, y); y += 24;
+    drawPdfHeader(doc, margin, y); y += 18;
+    exp.forEach((item) => {
+      if (y > 730) { doc.addPage(); y = 42; drawPdfHeader(doc, margin, y); y += 18; }
+      doc.setFont("helvetica","normal"); doc.setFontSize(9);
       doc.text(String(item.date), margin, y);
-      doc.text(String(item.description).slice(0, 44), margin + 80, y);
-      doc.text(String(item.category).slice(0, 20), margin + 285, y);
-      doc.text(formatSignedAmount(item), margin + 430, y, { align: "right" });
-      doc.text(item.currency, margin + 450, y);
-      doc.text(item.type, margin + 500, y);
+      doc.text(String(item.description).slice(0,44), margin+80, y);
+      doc.text(String(item.category).slice(0,20), margin+285, y);
+      doc.text(formatSignedAmount(item), margin+430, y, { align:"right" });
+      doc.text(item.currency, margin+450, y);
+      doc.text(item.type, margin+500, y);
       y += 14;
     });
-
     doc.save("movimientos_filtrados_ficohsa.pdf");
-    setStatus(`PDF generado con ${exportable.length} movimientos filtrados.`, "ok");
+    setStatus(`PDF generado con ${exp.length} movimientos filtrados.`, "ok");
   }
 
   function drawPdfHeader(doc, x, y) {
-    doc.setFont("helvetica", "bold");
-    doc.setFontSize(9);
-    doc.text("Fecha", x, y);
-    doc.text("Descripcion", x + 80, y);
-    doc.text("Categoria", x + 285, y);
-    doc.text("Monto", x + 430, y, { align: "right" });
-    doc.text("Moneda", x + 450, y);
-    doc.text("Tipo", x + 500, y);
+    doc.setFont("helvetica","bold"); doc.setFontSize(9);
+    doc.text("Fecha", x, y); doc.text("Descripcion", x+80, y); doc.text("Categoria", x+285, y);
+    doc.text("Monto", x+430, y, { align:"right" }); doc.text("Moneda", x+450, y); doc.text("Tipo", x+500, y);
   }
 
-  function sumSigned(rows) {
-    return rows.reduce((acc, item) => acc + (Number(item.signedAmount) || 0), 0);
-  }
+  // ---------- utilidades ----------
 
-  function formatMoney(value) {
-    return Number(value || 0).toLocaleString("en-US", { minimumFractionDigits: 2, maximumFractionDigits: 2 });
-  }
-
+  function sumSigned(rows) { return rows.reduce((acc, i) => acc + (Number(i.signedAmount) || 0), 0); }
+  function formatMoney(v)  { return Number(v||0).toLocaleString("en-US", { minimumFractionDigits:2, maximumFractionDigits:2 }); }
   function formatSignedAmount(item) {
-    const prefix = item.signedAmount < 0 ? "-" : "";
-    const symbol = item.currency === "USD" ? "$" : "L";
-    return `${prefix}${symbol} ${formatMoney(Math.abs(item.signedAmount))}`;
+    return `${item.signedAmount < 0 ? "-" : ""}${item.currency==="USD"?"$":"L"} ${formatMoney(Math.abs(item.signedAmount))}`;
   }
-
-  function csvCell(value) {
-    const text = String(value ?? "");
-    if (/[",\n]/.test(text)) return `"${text.replace(/"/g, '""')}"`;
-    return text;
+  function csvCell(v) {
+    const t = String(v ?? ""); return /[",\n]/.test(t) ? `"${t.replace(/"/g,'""')}"` : t;
   }
-
-  function escapeHtml(value) {
-    return String(value ?? "")
-      .replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;")
-      .replace(/"/g, "&quot;").replace(/'/g, "&#039;");
+  function escapeHtml(v) {
+    return String(v??"").replace(/&/g,"&amp;").replace(/</g,"&lt;").replace(/>/g,"&gt;").replace(/"/g,"&quot;").replace(/'/g,"&#039;");
   }
-
-  function setStatus(message, level = "") {
-    status.textContent = message;
-    status.className = `status${level ? ` ${level}` : ""}`;
+  function setStatus(msg, level = "") {
+    status.textContent = msg; status.className = `status${level ? ` ${level}` : ""}`;
   }
 </script>
 </body>
