@@ -3,20 +3,13 @@
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
-  <title>Lector de estados de cuenta Ficohsa</title>
+  <title>Lector de estados de cuenta</title>
   <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
   <style>
     :root {
       color-scheme: light;
-      --bg: #f5f7fb;
-      --panel: #ffffff;
-      --text: #1d2433;
-      --muted: #657085;
-      --line: #dce2ec;
-      --brand: #0b62b4;
-      --brand-dark: #084b89;
-      --good: #16784b;
-      --warn: #9a5a00;
+      --bg: #f5f7fb; --panel: #ffffff; --text: #1d2433; --muted: #657085;
+      --line: #dce2ec; --brand: #0b62b4; --brand-dark: #084b89; --good: #16784b; --warn: #9a5a00;
     }
     .metric { min-width: 0; }
     .metric .value, #filteredUsdMetric { white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
@@ -25,7 +18,7 @@
     * { box-sizing: border-box; }
     body { margin: 0; font-family: Arial, Helvetica, sans-serif; background: var(--bg); color: var(--text); }
     header { padding: 22px 28px; background: var(--panel); border-bottom: 1px solid var(--line); }
-    h1 { margin: 0 0 6px; font-size: 24px; letter-spacing: 0; }
+    h1 { margin: 0 0 6px; font-size: 24px; }
     header p { margin: 0; color: var(--muted); line-height: 1.4; }
     main { width: min(1180px, calc(100% - 32px)); margin: 22px auto; display: grid; gap: 16px; }
     .toolbar, .summary, .panel { background: var(--panel); border: 1px solid var(--line); border-radius: 8px; }
@@ -64,10 +57,9 @@
 </head>
 <body>
   <header>
-    <h1>Lector de estados de cuenta Ficohsa</h1>
+    <h1>Lector de estados de cuenta</h1>
     <p>Selecciona un PDF, revisa los movimientos extraidos y cambia la categoria cuando haga falta.</p>
   </header>
-
   <main>
     <section class="toolbar">
       <select id="bankSelect" aria-label="Banco">
@@ -84,7 +76,7 @@
       <button id="pdfButton" class="secondary">Exportar PDF</button>
       <button id="saveButton" class="secondary">💾 Guardar</button>
       <button id="saveAsButton" class="secondary">💾 Guardar como</button>
-      <button id="loadButton" class="secondary">📂 Cargar cambios</button>
+      <button id="loadButton" class="secondary">📂 Cargar sesion</button>
     </section>
 
     <section class="summary" aria-label="Resumen">
@@ -94,7 +86,7 @@
       <div class="metric"><span>Categoria principal</span><strong id="topCategoryMetric">-</strong></div>
       <div class="metric"><span>Saldo filtrado L</span><strong id="filteredMetric">L 0.00</strong></div>
       <div class="metric usd-wide"><span>USD aislado</span><strong id="filteredUsdMetric">$ 0.00</strong></div>
-      <div class="metric"><span>Archivo guardado</span><strong id="savedFileMetric" title="-">-</strong></div>
+      <div class="metric"><span>Sesion activa</span><strong id="savedFileMetric" title="-">-</strong></div>
     </section>
 
     <section class="panel">
@@ -160,10 +152,10 @@
   ];
 
   const profiles = {
-    ficohsa:  { label: "Ficohsa",  parser: "ficohsa"  },
-    bac:      { label: "BAC",      parser: "bac"      },
-    banpais:  { label: "Banpais",  parser: "banpais"  },
-    promerica:{ label: "Promerica",parser: "promerica"}
+    ficohsa:  { label: "Ficohsa"  },
+    bac:      { label: "BAC"      },
+    banpais:  { label: "Banpais"  },
+    promerica:{ label: "Promerica"}
   };
 
   const state = {
@@ -208,16 +200,16 @@
   exportButton.addEventListener("click", () => exportRows(getFilteredTransactions(), "movimientos_filtrados.csv"));
   sheetsButton.addEventListener("click",  () => exportRows(getFilteredTransactions(), "movimientos_google_sheets.csv"));
   pdfButton.addEventListener("click",     () => exportFilteredPdf(getFilteredTransactions()));
-  saveButton.addEventListener("click",    saveEdits);
-  saveAsButton.addEventListener("click",  saveEditsAs);
-  loadButton.addEventListener("click",    loadEdits);
+  saveButton.addEventListener("click",    saveSession);
+  saveAsButton.addEventListener("click",  saveSessionAs);
+  loadButton.addEventListener("click",    loadSession);
   searchInput.addEventListener("input",   render);
   categoryFilter.addEventListener("change", render);
   currencyFilter.addEventListener("change", render);
 
-  // ═══════════════════════════════════════════════
+  // ═══════════════════════════════════════
   //  LEER PDF
-  // ═══════════════════════════════════════════════
+  // ═══════════════════════════════════════
   async function readPdf() {
     const file = fileInput.files[0];
     if (!file) { setStatus("Selecciona primero el estado de cuenta PDF.", "warn"); return; }
@@ -239,7 +231,7 @@
     if (!state.transactions.length) {
       setStatus("No pude detectar movimientos. Abre 'Ver texto extraido' para revisar.", "warn");
     } else {
-      setStatus(`Listo: ${state.transactions.length} movimientos con perfil ${profileLabel(state.activeProfile)}.`, "ok");
+      setStatus(`Listo: ${state.transactions.length} movimientos — perfil ${profileLabel(state.activeProfile)}.`, "ok");
     }
     render();
   }
@@ -259,114 +251,77 @@
       .filter(Boolean);
   }
 
-  // ═══════════════════════════════════════════════
-  //  DISPATCHER DE PARSEO
-  // ═══════════════════════════════════════════════
+  // ═══════════════════════════════════════
+  //  PARSERS
+  // ═══════════════════════════════════════
   function parseTransactions(text, rawRows = []) {
     if (state.selectedProfile === "auto") {
-      const attempts = Object.keys(profiles).map((k) => ({
-        k, rows: parseWithProfile(text, k, rawRows)
-      }));
+      const attempts = Object.keys(profiles).map((k) => ({ k, rows: parseWithProfile(text, k) }));
       attempts.sort((a, b) => b.rows.length - a.rows.length);
       state.activeProfile = attempts[0]?.k || "auto";
       return attempts[0]?.rows || [];
     }
     state.activeProfile = state.selectedProfile;
-    return parseWithProfile(text, state.selectedProfile, rawRows);
+    return parseWithProfile(text, state.selectedProfile);
   }
 
-  function parseWithProfile(text, profileKey, rawRows = []) {
-    if (profileKey === "bac") return parseBac(text);
+  function parseWithProfile(text, profileKey) {
+    if (profileKey === "bac")     return parseBac(text);
     if (profileKey === "ficohsa") return parseFicohsa(text);
-    // banpais / promerica — parseo genérico mejorado
     return parseGeneric(text, profileKey);
   }
 
-  // ═══════════════════════════════════════════════
-  //  PARSER BAC  (formato: código fecha MAY/DD descripcion monto [-])
-  // ═══════════════════════════════════════════════
+  // — BAC —
   function parseBac(text) {
     const skipRE = /^(no\.\s*de\s*referencia|fecha\s*de\s*corte|saldo\s*anterior|saldo\s*total|l[ií]mite|pago\s*m[ií]nimo|pago\s*de\s*contado|cr[eé]dito\s*disponible|intereses|extrafinanciamiento|plazo|tasa|per[ií]odo|programa|pricecash|estimado|recomendaci|informaci|www\.|para\s*servicio|a\s*partir)/i;
-
-    // Fecha BAC: MAY/21, JUN/03, etc.
     const datePat = /\b(ENE|FEB|MAR|ABR|MAY|JUN|JUL|AGO|SEP|OCT|NOV|DIC)\/(\d{1,2})\b/i;
-
-    // Monto: 1,234.56 o 1,234.56- o $1.23 o $1.23-
-    const amountPat = /(\$)?\s*(\d{1,3}(?:,\d{3})*(?:\.\d{2})?)-?\s*$/;
-
     const transactions = [];
-
     for (const rawLine of text.split(/\n+/)) {
       const line = rawLine.trim();
       if (!line || skipRE.test(line)) continue;
-
       const dateMatch = line.match(datePat);
       if (!dateMatch) continue;
-
       const date = `${dateMatch[1]}/${dateMatch[2]}`;
       const afterDate = line.slice(line.indexOf(dateMatch[0]) + dateMatch[0].length).trim();
-
-      // Buscar todos los montos al final de la línea (puede haber L y $ separados)
-      // Patrón: uno o dos números al final (HNL y opcionalmente USD)
       const amountsRaw = [...afterDate.matchAll(/\$?\s*\d{1,3}(?:,\d{3})*(?:\.\d{2})?-?/g)];
       if (!amountsRaw.length) continue;
-
-      // El último token numérico es el monto principal
-      const lastAmountMatch = amountsRaw[amountsRaw.length - 1];
-      const rawAmount  = lastAmountMatch[0].trim();
-      const isUsd      = rawAmount.startsWith("$") || afterDate.trimEnd().endsWith(rawAmount) && amountsRaw.length >= 2 && amountsRaw[amountsRaw.length - 2][0].startsWith("$");
-      const isCredit   = rawAmount.endsWith("-");
-      const amount     = parseAmount(rawAmount);
+      const lastAm = amountsRaw[amountsRaw.length - 1];
+      const rawAmount = lastAm[0].trim();
+      const isCredit  = rawAmount.endsWith("-");
+      const amount    = parseAmount(rawAmount);
       if (!Number.isFinite(amount) || amount === 0) continue;
-
-      // Descripción: texto entre fecha y primer monto
-      const description = afterDate.slice(0, lastAmountMatch.index)
-        .replace(/\b\d{5,}\b/g, "")   // quitar referencias largas
-        .replace(/\s+/g, " ").trim();
+      const description = afterDate.slice(0, lastAm.index).replace(/\b\d{5,}\b/g, "").replace(/\s+/g, " ").trim();
       if (!description || description.length < 3) continue;
-
-      // Detectar si la línea tiene monto USD explícito ($X.XX) separado del HNL
-      // Regla: si hay DOS montos al final y el último empieza con $, es USD; si solo hay uno y empieza con $ => USD
-      let currency = "HNL";
-      if (rawAmount.startsWith("$")) {
-        currency = "USD";
-      } else if (amountsRaw.length >= 2) {
-        // hay monto HNL y monto USD en la misma línea — generamos dos transacciones
+      // dos montos: HNL + USD en la misma línea
+      if (amountsRaw.length >= 2) {
         const usdRaw = amountsRaw[amountsRaw.length - 1][0].trim();
         const hnlRaw = amountsRaw[amountsRaw.length - 2][0].trim();
         if (usdRaw.startsWith("$") && !hnlRaw.startsWith("$")) {
-          const usdAmount = parseAmount(usdRaw);
-          const hnlAmount = parseAmount(hnlRaw);
-          const credit2   = usdRaw.endsWith("-") || hnlRaw.endsWith("-");
-          if (Number.isFinite(hnlAmount) && hnlAmount !== 0) {
+          const credit2 = usdRaw.endsWith("-") || hnlRaw.endsWith("-");
+          const hnlAmt  = parseAmount(hnlRaw);
+          const usdAmt  = parseAmount(usdRaw);
+          if (Number.isFinite(hnlAmt) && hnlAmt !== 0)
             transactions.push(buildTx({ date, description, rawAmount: hnlRaw, currency: "HNL", forceCredit: credit2 }));
-          }
-          if (Number.isFinite(usdAmount) && usdAmount !== 0) {
+          if (Number.isFinite(usdAmt) && usdAmt !== 0)
             transactions.push(buildTx({ date, description, rawAmount: usdRaw, currency: "USD", forceCredit: credit2 }));
-          }
           continue;
         }
       }
-
+      const currency = rawAmount.startsWith("$") ? "USD" : "HNL";
       transactions.push(buildTx({ date, description, rawAmount, currency, forceCredit: isCredit }));
     }
-
-    return mergeDuplicateTransactions(transactions);
+    return mergeDups(transactions);
   }
 
-  // ═══════════════════════════════════════════════
-  //  PARSER FICOHSA  (igual que antes, dedicado)
-  // ═══════════════════════════════════════════════
+  // — Ficohsa —
   function parseFicohsa(text) {
-    const lines = text.split(/\n+/).map((l) => l.trim()).filter(Boolean);
     const results = [];
-    for (const line of lines) {
+    for (const line of text.split(/\n+/).map((l) => l.trim()).filter(Boolean)) {
       const tx = parseFicohsaLine(line);
       if (!tx) continue;
-      if (Array.isArray(tx)) results.push(...tx);
-      else results.push(tx);
+      if (Array.isArray(tx)) results.push(...tx); else results.push(tx);
     }
-    return mergeDuplicateTransactions(results);
+    return mergeDups(results);
   }
 
   function parseFicohsaLine(line) {
@@ -391,12 +346,10 @@
     if (!description || description.length < 3) return null;
     return buildTx({ date:dm[1], description, rawAmount:sel[0],
       currency: detectFicohsaCurrency(t, description, sel[0], amount),
-      forceCredit: isCreditTransaction(`${sel[0]} ${description}`) });
+      forceCredit: isCreditTx(`${sel[0]} ${description}`) });
   }
 
-  // ═══════════════════════════════════════════════
-  //  PARSER GENÉRICO  (Banpais / Promerica)
-  // ═══════════════════════════════════════════════
+  // — Genérico (Banpais / Promerica) —
   function parseGeneric(text, profileKey) {
     const skipMap = {
       banpais:   /saldo anterior|saldo actual|fecha transacci[oó]n|fecha posteo|limite|l[ií]mite|total/i,
@@ -418,17 +371,17 @@
       if (!description || description.length < 3) continue;
       results.push(buildTx({ date:dm[1], description, rawAmount:sel[0],
         currency: detectCurrency(`${line} ${sel[0]}`),
-        forceCredit: isCreditTransaction(`${sel[0]} ${description}`) }));
+        forceCredit: isCreditTx(`${sel[0]} ${description}`) }));
     }
-    return mergeDuplicateTransactions(results);
+    return mergeDups(results);
   }
 
-  // ═══════════════════════════════════════════════
-  //  HELPERS
-  // ═══════════════════════════════════════════════
-  function buildTx({ date, description, category, rawAmount, currency, forceCredit, originalLine = "" }) {
+  // ═══════════════════════════════════════
+  //  HELPERS DE PARSEO
+  // ═══════════════════════════════════════
+  function buildTx({ date, description, category, rawAmount, currency, forceCredit }) {
     const amount = parseAmount(rawAmount);
-    const credit = forceCredit || isCreditTransaction(`${rawAmount} ${description}`);
+    const credit = forceCredit || isCreditTx(`${rawAmount} ${description}`);
     return {
       id: crypto.randomUUID(), date, description,
       category: category || categorize(description),
@@ -436,27 +389,24 @@
       signedAmount: credit ? -Math.abs(amount) : Math.abs(amount),
       currency: currency || "HNL",
       type: credit ? "Credito" : "Gasto",
-      originalLine, includeInTotals: true, manualAmount: null
+      includeInTotals: true, manualAmount: null
     };
   }
 
   function parseAmount(v) {
     return Number.parseFloat(
-      String(v).replace(/HNL|USD|US\$|L\.?|\$/gi,"")
-               .replace(/\b(?:CR|DR|C|D)\b/gi,"")
+      String(v).replace(/HNL|USD|US\$|L\.?|\$/gi,"").replace(/\b(?:CR|DR|C|D)\b/gi,"")
                .replace(/,/g,"").replace(/-$/,"").trim()
     );
   }
 
-  function isCreditTransaction(v) {
+  function isCreditTx(v) {
     const c = String(v).trim();
     return /(?:^|\s)-\d|-$/i.test(c) ||
       /(?:^|\s)(?:pago\s*recibido|pago|abono|credito|cr[eé]dito|cr\b|reversion|reversi[oó]n|devolucion|devoluci[oó]n|descuento|bonificaci[oó]n|bono|ajuste\s+a\s+favor|gracias\s+por\s+su\s+pago)(?:\s|$)/i.test(c);
   }
 
-  function detectCurrency(v) {
-    return /USD|US\$|DOLAR|D[OÓ]LAR|\$/i.test(String(v)) ? "USD" : "HNL";
-  }
+  function detectCurrency(v) { return /USD|US\$|DOLAR|D[OÓ]LAR|\$/i.test(String(v)) ? "USD" : "HNL"; }
 
   function detectFicohsaCurrency(line, desc, raw, amount) {
     if (detectCurrency(`${line} ${raw}`) === "USD") return "USD";
@@ -472,12 +422,7 @@
 
   function profileLabel(k) { return profiles[k]?.label || "Auto"; }
 
-  function buildStableKey(tx) {
-    return [String(tx.date||"").trim().toUpperCase(), String(tx.description||"").trim().toUpperCase(),
-            Number(tx.amount||0).toFixed(2), String(tx.currency||"").trim().toUpperCase()].join("|");
-  }
-
-  function mergeDuplicateTransactions(txs) {
+  function mergeDups(txs) {
     const seen = new Set();
     return txs.filter((tx) => {
       const k = [String(tx.date).toUpperCase(), String(tx.description).toUpperCase(),
@@ -486,19 +431,28 @@
     });
   }
 
-  // ═══════════════════════════════════════════════
-  //  GUARDAR / CARGAR
-  // ═══════════════════════════════════════════════
-  function buildPayload() {
+  // ═══════════════════════════════════════
+  //  GUARDAR SESION COMPLETA
+  //  Guarda transacciones completas, no solo llaves.
+  //  Al cargar NO depende del parser.
+  // ═══════════════════════════════════════
+  function buildSessionPayload() {
     return {
+      version: 2,
       savedAt: new Date().toISOString(),
       bank: state.activeProfile,
-      edits: state.transactions.map((tx) => ({
-        key: buildStableKey(tx),
-        category: tx.category, currency: tx.currency,
+      bankLabel: profileLabel(state.activeProfile),
+      transactions: state.transactions.map((tx) => ({
+        id:             tx.id,
+        date:           tx.date,
+        description:    tx.description,
+        category:       tx.category,
+        amount:         tx.amount,
+        signedAmount:   tx.signedAmount,
+        currency:       tx.currency,
+        type:           tx.type,
         includeInTotals: tx.includeInTotals !== false,
-        signedAmount: Number(tx.signedAmount || 0),
-        manualAmount: tx.manualAmount
+        manualAmount:   tx.manualAmount ?? null
       }))
     };
   }
@@ -514,29 +468,32 @@
     savedFileMetric.textContent = name; savedFileMetric.title = name;
   }
 
-  function saveEdits() {
+  // 💾 Guardar — mismo nombre de archivo
+  function saveSession() {
     if (!state.transactions.length) { setStatus("No hay movimientos para guardar.", "warn"); return; }
-    if (!state.currentFilename) { saveEditsAs(); return; }
-    const payload = buildPayload();
+    if (!state.currentFilename) { saveSessionAs(); return; }
+    const payload = buildSessionPayload();
     downloadJson(payload, state.currentFilename);
-    setStatus(`✅ Guardado como "${state.currentFilename}" (${payload.edits.length} movimientos).`, "ok");
+    setStatus(`✅ Guardado "${state.currentFilename}" (${payload.transactions.length} movimientos).`, "ok");
   }
 
-  function saveEditsAs() {
+  // 💾 Guardar como — pide nombre nuevo
+  function saveSessionAs() {
     if (!state.transactions.length) { setStatus("No hay movimientos para guardar.", "warn"); return; }
     const bankLabel = profileLabel(state.activeProfile).toLowerCase().replace(/\s+/g, "_");
     const dateStr   = new Date().toISOString().slice(0, 10);
-    const suggested = state.currentFilename || `edits_${bankLabel}_${dateStr}.json`;
+    const suggested = state.currentFilename || `sesion_${bankLabel}_${dateStr}.json`;
     const nombre    = window.prompt("Nombre del archivo:", suggested);
     if (!nombre) return;
     const filename = nombre.endsWith(".json") ? nombre : `${nombre}.json`;
-    const payload  = buildPayload();
+    const payload  = buildSessionPayload();
     downloadJson(payload, filename);
     setCurrentFilename(filename);
-    setStatus(`✅ Guardado como "${filename}" (${payload.edits.length} movimientos).`, "ok");
+    setStatus(`✅ Guardado como "${filename}" (${payload.transactions.length} movimientos).`, "ok");
   }
 
-  function loadEdits() {
+  // 📂 Cargar sesion — restaura directamente sin re-parsear
+  function loadSession() {
     const input = document.createElement("input");
     input.type = "file"; input.accept = "application/json,.json";
     input.addEventListener("change", async () => {
@@ -544,13 +501,38 @@
       let payload;
       try { payload = JSON.parse(await file.text()); }
       catch { setStatus("El archivo no es un JSON válido.", "warn"); return; }
-      if (!state.transactions.length) { setStatus("Primero lee un PDF.", "warn"); return; }
+
+      // Versión 2: transacciones completas — carga directa
+      if (payload.version === 2 && Array.isArray(payload.transactions)) {
+        state.transactions = payload.transactions.map((tx) => ({
+          id:             tx.id || crypto.randomUUID(),
+          date:           tx.date,
+          description:    tx.description,
+          category:       tx.category,
+          amount:         Number(tx.amount) || 0,
+          signedAmount:   Number(tx.signedAmount) || 0,
+          currency:       tx.currency || "HNL",
+          type:           tx.type || "Gasto",
+          includeInTotals: tx.includeInTotals !== false,
+          manualAmount:   tx.manualAmount ?? null
+        }));
+        state.activeProfile = payload.bank || "auto";
+        setCurrentFilename(file.name);
+        render();
+        setStatus(`✅ Sesion "${file.name}" cargada: ${state.transactions.length} movimientos.`, "ok");
+        return;
+      }
+
+      // Versión 1 (legacy): intentar emparejar por llave
+      if (!state.transactions.length) { setStatus("Primero lee un PDF para aplicar cambios del formato anterior.", "warn"); return; }
       const map = new Map((payload.edits || []).map((e) => [e.key, e]));
       let applied = 0;
       state.transactions.forEach((tx) => {
-        const edit = map.get(buildStableKey(tx)); if (!edit) return;
-        tx.category = edit.category ?? tx.category;
-        tx.currency = edit.currency ?? tx.currency;
+        const key  = [String(tx.date||"").trim().toUpperCase(), String(tx.description||"").trim().toUpperCase(),
+                      Number(tx.amount||0).toFixed(2), String(tx.currency||"").trim().toUpperCase()].join("|");
+        const edit = map.get(key); if (!edit) return;
+        tx.category        = edit.category ?? tx.category;
+        tx.currency        = edit.currency ?? tx.currency;
         tx.includeInTotals = edit.includeInTotals !== false;
         if (Number.isFinite(Number(edit.signedAmount))) {
           tx.signedAmount = Number(edit.signedAmount);
@@ -562,14 +544,14 @@
       });
       setCurrentFilename(file.name);
       render();
-      setStatus(`✅ "${file.name}": ${applied} movimiento(s) restaurados.`, applied ? "ok" : "warn");
+      setStatus(`✅ "${file.name}": ${applied} movimiento(s) restaurados (formato anterior).`, applied ? "ok" : "warn");
     });
     input.click();
   }
 
-  // ═══════════════════════════════════════════════
+  // ═══════════════════════════════════════
   //  RENDER
-  // ═══════════════════════════════════════════════
+  // ═══════════════════════════════════════
   function render() {
     const rows = getFilteredTransactions();
     body.innerHTML = "";
@@ -583,13 +565,13 @@
       rows.forEach((tx) => {
         const row = document.createElement("tr");
         row.innerHTML = `
-          <td>${escapeHtml(tx.date)}</td>
-          <td>${escapeHtml(tx.description)}</td>
-          <td>${categorySelect(tx)}</td>
-          <td class="amount">${amountInput(tx)}</td>
-          <td>${currencySelect(tx)}</td>
+          <td>${escHtml(tx.date)}</td>
+          <td>${escHtml(tx.description)}</td>
+          <td>${catSelect(tx)}</td>
+          <td class="amount">${amtInput(tx)}</td>
+          <td>${curSelect(tx)}</td>
           <td>${tx.type}</td>
-          <td>${includeSelect(tx)}</td>`;
+          <td>${incSelect(tx)}</td>`;
         body.appendChild(row);
       });
     }
@@ -622,22 +604,22 @@
     );
   }
 
-  function categorySelect(tx) {
-    const opts = categories.map((c) => `<option value="${escapeHtml(c)}" ${c===tx.category?"selected":""}>${escapeHtml(c)}</option>`).join("");
+  function catSelect(tx) {
+    const opts = categories.map((c) => `<option value="${escHtml(c)}" ${c===tx.category?"selected":""}>${escHtml(c)}</option>`).join("");
     return `<select class="category" data-id="${tx.id}">${opts}</select>`;
   }
-  function currencySelect(tx) {
+  function curSelect(tx) {
     return `<select data-currency-id="${tx.id}">
       <option value="HNL" ${tx.currency==="HNL"?"selected":""}>HNL</option>
       <option value="USD" ${tx.currency==="USD"?"selected":""}>USD</option></select>`;
   }
-  function includeSelect(tx) {
+  function incSelect(tx) {
     const inc = tx.includeInTotals !== false;
     return `<select data-include-id="${tx.id}">
       <option value="yes" ${inc?"selected":""}>Si</option>
       <option value="no" ${!inc?"selected":""}>No</option></select>`;
   }
-  function amountInput(tx) {
+  function amtInput(tx) {
     return `<input data-amount-id="${tx.id}" type="number" step="0.01" value="${Number(tx.signedAmount||0).toFixed(2)}" style="width:120px;text-align:right;">`;
   }
 
@@ -656,16 +638,16 @@
       .forEach((i) => totals.set(i.category, (totals.get(i.category)||0) + i.signedAmount));
     const top = [...totals.entries()].sort((a, b) => b[1] - a[1])[0];
     document.querySelector("#countMetric").textContent       = incAll.length;
-    document.querySelector("#debitMetric").textContent       = `L ${formatMoney(sumSigned(debits))}`;
-    document.querySelector("#creditMetric").textContent      = `L ${formatMoney(sumSigned(credits))}`;
+    document.querySelector("#debitMetric").textContent       = `L ${fmtMoney(sumSigned(debits))}`;
+    document.querySelector("#creditMetric").textContent      = `L ${fmtMoney(sumSigned(credits))}`;
     document.querySelector("#topCategoryMetric").textContent = top ? top[0] : "-";
-    document.querySelector("#filteredMetric").textContent    = `L ${formatMoney(sumSigned(filtHnl))}`;
-    document.querySelector("#filteredUsdMetric").textContent = `${filtUsd.length} mov. / $ ${formatMoney(sumSigned(filtUsd))}`;
+    document.querySelector("#filteredMetric").textContent    = `L ${fmtMoney(sumSigned(filtHnl))}`;
+    document.querySelector("#filteredUsdMetric").textContent = `${filtUsd.length} mov. / $ ${fmtMoney(sumSigned(filtUsd))}`;
   }
 
-  // ═══════════════════════════════════════════════
+  // ═══════════════════════════════════════
   //  EXPORTAR CSV / PDF
-  // ═══════════════════════════════════════════════
+  // ═══════════════════════════════════════
   function exportRows(rows, filename) {
     const exp = rows.filter((i) => i.includeInTotals !== false);
     if (!exp.length) { setStatus("No hay movimientos para exportar.", "warn"); return; }
@@ -691,8 +673,8 @@
     doc.text(`Categoria: ${categoryFilter.value||"Todas"}`, m, y); y += 14;
     doc.text(`Moneda: ${currencyFilter.value||"Todas"}`, m, y); y += 14;
     doc.text(`Movimientos: ${exp.length}`, m, y); y += 14;
-    doc.text(`Total L: L ${formatMoney(sumSigned(exp.filter((i)=>i.currency==="HNL")))}`, m, y); y += 14;
-    doc.text(`Total $: $ ${formatMoney(sumSigned(exp.filter((i)=>i.currency==="USD")))}`, m, y); y += 24;
+    doc.text(`Total L: L ${fmtMoney(sumSigned(exp.filter((i)=>i.currency==="HNL")))}`, m, y); y += 14;
+    doc.text(`Total $: $ ${fmtMoney(sumSigned(exp.filter((i)=>i.currency==="USD")))}`, m, y); y += 24;
     drawPdfHeader(doc, m, y); y += 18;
     exp.forEach((item) => {
       if (y > 730) { doc.addPage(); y = 42; drawPdfHeader(doc, m, y); y += 18; }
@@ -700,7 +682,7 @@
       doc.text(String(item.date), m, y);
       doc.text(String(item.description).slice(0,44), m+80, y);
       doc.text(String(item.category).slice(0,20), m+285, y);
-      doc.text(formatSignedAmount(item), m+430, y, { align:"right" });
+      doc.text(fmtSigned(item), m+430, y, { align:"right" });
       doc.text(item.currency, m+450, y);
       doc.text(item.type, m+500, y);
       y += 14;
@@ -715,18 +697,15 @@
     doc.text("Monto",x+430,y,{align:"right"}); doc.text("Moneda",x+450,y); doc.text("Tipo",x+500,y);
   }
 
+  // ═══════════════════════════════════════
+  //  UTILIDADES
+  // ═══════════════════════════════════════
   function sumSigned(rows)  { return rows.reduce((a,i) => a + (Number(i.signedAmount)||0), 0); }
-  function formatMoney(v)   { return Number(v||0).toLocaleString("en-US",{minimumFractionDigits:2,maximumFractionDigits:2}); }
-  function formatSignedAmount(item) {
-    return `${item.signedAmount<0?"-":""}${item.currency==="USD"?"$":"L"} ${formatMoney(Math.abs(item.signedAmount))}`;
-  }
-  function csvCell(v) { const t=String(v??""); return /[",\n]/.test(t)?`"${t.replace(/"/g,'""')}"`:`${t}`; }
-  function escapeHtml(v) {
-    return String(v??"").replace(/&/g,"&amp;").replace(/</g,"&lt;").replace(/>/g,"&gt;").replace(/"/g,"&quot;").replace(/'/g,"&#039;");
-  }
-  function setStatus(msg, level="") {
-    status.textContent = msg; status.className = `status${level?` ${level}`:""}`;
-  }
+  function fmtMoney(v)      { return Number(v||0).toLocaleString("en-US",{minimumFractionDigits:2,maximumFractionDigits:2}); }
+  function fmtSigned(item)  { return `${item.signedAmount<0?"-":""}${item.currency==="USD"?"$":"L"} ${fmtMoney(Math.abs(item.signedAmount))}`; }
+  function csvCell(v)       { const t=String(v??""); return /[",\n]/.test(t)?`"${t.replace(/"/g,'""')}"`:`${t}`; }
+  function escHtml(v)       { return String(v??"").replace(/&/g,"&amp;").replace(/</g,"&lt;").replace(/>/g,"&gt;").replace(/"/g,"&quot;").replace(/'/g,"&#039;"); }
+  function setStatus(msg, level="") { status.textContent=msg; status.className=`status${level?` ${level}`:""}`;  }
 </script>
 </body>
 </html>
